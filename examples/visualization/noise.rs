@@ -21,23 +21,34 @@ struct NoiseImage;
 
 #[derive(Reflect, Resource, InspectorOptions)]
 #[reflect(Resource, InspectorOptions)]
-struct Configuration {
-    influence: Vec<f32>,
+struct NoiseConfiguration {
+    layers: Vec<(f32, f32)>,
     wrap: usize,
-    compress_factor: f32,
-    width: u32,
-    height: u32,
+    seed: Option<u64>,
     // #[inspector(min = 0.0, max = 1.0)]
+}
+
+impl Default for NoiseConfiguration {
+    fn default() -> Self {
+        NoiseConfiguration {
+            layers: vec![(0.5, 1.), (0.25, 2.), (0.125, 4.), (0.075, 8.)],
+            wrap: 256,
+            seed: Some(0),
+        }
+    }
+}
+
+#[derive(Reflect, Resource, InspectorOptions)]
+#[reflect(Resource, InspectorOptions)]
+struct Configuration {
+    #[inspector(min = 0.0, max = 1.0)]
+    compress_factor: f32,
 }
 
 impl Default for Configuration {
     fn default() -> Self {
         Configuration {
-            influence: vec![0.5, 0.25, 0.125, 0.075],
-            wrap: 256,
             compress_factor: 0.03,
-            width: 1920,
-            height: 1080,
         }
     }
 }
@@ -45,16 +56,18 @@ impl Default for Configuration {
 #[derive(Resource)]
 struct Global {
     noise: Perlin,
+    width: u32,
+    height: u32,
 }
 
 impl Default for Global {
     fn default() -> Self {
-        let Configuration {
-            influence, wrap, ..
-        } = Configuration::default();
+        let NoiseConfiguration { layers, wrap, seed } = NoiseConfiguration::default();
 
         Global {
-            noise: Perlin::new(influence, wrap),
+            noise: Perlin::new(&layers, wrap, seed),
+            width: 1920,
+            height: 1080,
         }
     }
 }
@@ -72,7 +85,11 @@ fn main() {
         }))
         .init_resource::<Global>()
         .init_resource::<Configuration>()
+        .init_resource::<NoiseConfiguration>()
         .register_type::<Configuration>()
+        .register_type::<NoiseConfiguration>()
+        .add_plugins(ResourceInspectorPlugin::<Configuration>::default())
+        .add_plugins(ResourceInspectorPlugin::<NoiseConfiguration>::default())
         .add_plugins(
             ResourceInspectorPlugin::<Configuration>::default()
                 .run_if(input_toggle_active(true, KeyCode::Escape)),
@@ -103,9 +120,9 @@ fn setup(
     let factor = config.compress_factor;
     let mut colors = Vec::new();
 
-    for y in 0..config.height {
-        for x in 0..config.width {
-            let value = (noise.get(&[x as f32 * factor, y as f32 * factor]) * 256.) as u8;
+    for y in 0..global.height {
+        for x in 0..global.width {
+            let value = (noise.get((x as f32 * factor, y as f32 * factor)) * 256.) as u8;
 
             colors.push(value);
             colors.push(value);
@@ -119,16 +136,16 @@ fn setup(
         MaterialMesh2dBundle {
             mesh: meshes.add(Rectangle::default()).into(),
             transform: Transform::default().with_scale(Vec3 {
-                x: config.width as f32,
-                y: config.height as f32,
+                x: global.width as f32,
+                y: global.height as f32,
                 z: 1.,
             }),
             material: materials.add(ColorMaterial {
                 color: Color::srgb(1., 1., 1.),
                 texture: Some(images.add(Image::new_fill(
                     Extent3d {
-                        width: config.width,
-                        height: config.height,
+                        width: global.width,
+                        height: global.height,
                         depth_or_array_layers: 1,
                     },
                     TextureDimension::D2,
@@ -148,10 +165,17 @@ fn update(
     mut images: ResMut<Assets<Image>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     config: Res<Configuration>,
-    global: Res<Global>,
+    noise_config: Res<NoiseConfiguration>,
+    mut global: ResMut<Global>,
 ) {
-    if !config.is_changed() {
+    if !config.is_changed() && !noise_config.is_changed() {
         return;
+    }
+
+    if noise_config.is_changed() {
+        global.noise.set_layers(&noise_config.layers);
+        global.noise.set_wrap(noise_config.wrap);
+        global.noise.set_seed(noise_config.seed.unwrap_or(0));
     }
 
     let noise = &global.noise;
@@ -159,9 +183,9 @@ fn update(
     let factor = config.compress_factor;
     let mut colors = Vec::new();
 
-    for y in 0..config.height {
-        for x in 0..config.width {
-            let value = (noise.get(&[x as f32 * factor, y as f32 * factor]) * 256.) as u8;
+    for y in 0..global.height {
+        for x in 0..global.width {
+            let value = (noise.get((x as f32 * factor, y as f32 * factor)) * 256.) as u8;
 
             colors.push(value);
             colors.push(value);
@@ -181,8 +205,8 @@ fn update(
         color: Color::srgb(1., 1., 1.),
         texture: Some(images.add(Image::new_fill(
             Extent3d {
-                width: config.width,
-                height: config.height,
+                width: global.width,
+                height: global.height,
                 depth_or_array_layers: 1,
             },
             TextureDimension::D2,

@@ -56,7 +56,7 @@ fn main() {
         })
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::default().in_fixed_schedule())
         // Comment DebugRenderer to disable
-        .add_plugins(RapierDebugRenderPlugin::default())
+        // .add_plugins(RapierDebugRenderPlugin::default())
         // Plugins
         .add_plugins((
             CommonPlugin,

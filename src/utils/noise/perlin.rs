@@ -1,37 +1,81 @@
 use bevy::{math::FloatExt, prelude::Vec2};
-use rand::Rng;
+use rand::prelude::*;
 
 use super::Noise;
 pub struct Perlin {
     permutation: Vec<usize>,
     wrap: usize,
-    influence: Vec<f32>,
-    infl_sum: f32,
+    layers: Vec<(f32, f32)>,
+    seed: u64,
 }
 
 impl Perlin {
-    pub fn new(influence: Vec<f32>, wrap: usize) -> Self {
-        let mut permutation = (0..wrap).collect();
-        shuffle(&mut permutation);
+    pub fn new(layers: &[(f32, f32)], wrap: usize, seed: Option<u64>) -> Self {
+        let seed = seed.unwrap_or(0);
+        let mut permutation: Vec<usize> = (0..wrap).collect();
+        let mut rng = StdRng::seed_from_u64(seed);
+        permutation.shuffle(&mut rng);
+
         permutation.append(&mut permutation.clone());
-        let infl_sum = influence.iter().sum();
+
+        println!("Len: {:?}", permutation.len());
+
+        let infl_sum: f32 = layers.iter().map(|(weight, _)| weight).sum();
+        let layers = layers
+            .iter()
+            .map(|(weight, compression_factor)| (weight / infl_sum, *compression_factor))
+            .collect();
 
         Perlin {
             permutation,
             wrap,
-            influence,
-            infl_sum,
+            layers,
+            seed,
         }
+    }
+
+    pub fn set_layers(&mut self, layers: &[(f32, f32)]) {
+        let infl_sum: f32 = layers.iter().map(|(weight, _)| weight).sum();
+
+        self.layers = layers
+            .iter()
+            .map(|(weight, compression_factor)| (weight / infl_sum, *compression_factor))
+            .collect();
+    }
+
+    pub fn set_wrap(&mut self, wrap: usize) {
+        self.wrap = wrap;
+
+        self.permutation = (0..wrap).collect();
+        let mut rng = StdRng::seed_from_u64(self.seed);
+        self.permutation.shuffle(&mut rng);
+        self.permutation.append(&mut self.permutation.clone());
+    }
+
+    pub fn set_seed(&mut self, seed: u64) {
+        self.permutation = (0..self.wrap).collect();
+        let mut rng = StdRng::seed_from_u64(seed);
+        self.permutation.shuffle(&mut rng);
+        self.permutation.append(&mut self.permutation.clone());
+
+        self.seed = seed;
+    }
+
+    pub fn regen(&mut self) {
+        let mut rng = rand::thread_rng();
+        let seed: u64 = rng.next_u64();
+
+        self.set_seed(seed);
     }
 }
 
-impl Noise<[f32; 2], f32> for Perlin {
-    fn get(&self, input: &[f32; 2]) -> f32 {
+impl Noise<(f32, f32), f32> for Perlin {
+    fn get(&self, input: (f32, f32)) -> f32 {
         let mut value = 0.;
 
-        for i in 0..self.influence.len() {
-            let x = input[0] * ((1 << i) as f32);
-            let y = input[1] * ((1 << i) as f32);
+        for (weight, compression_factor) in &self.layers {
+            let x = input.0 * compression_factor;
+            let y = input.1 * compression_factor;
             let xf = x - x.floor();
             let yf = y - y.floor();
             let x = x as usize & (self.wrap - 1);
@@ -59,25 +103,11 @@ impl Noise<[f32; 2], f32> for Perlin {
             value += dot_bottom_left
                 .lerp(dot_top_left, v)
                 .lerp(dot_bottom_right.lerp(dot_top_right, v), u)
-                * self.influence[i]
-                / self.infl_sum;
+                * weight;
         }
 
         // Normalized to [0, 1]
         (1_f32 + value) / 2_f32
-    }
-}
-
-fn shuffle<T: Copy>(vec: &mut Vec<T>) {
-    let mut rng = rand::thread_rng();
-
-    for ceil in (1..vec.len()).rev() {
-        let index = (rng.gen::<f32>() * (ceil - 1) as f32) as usize;
-
-        let temp = vec[ceil];
-
-        vec[ceil] = vec[index];
-        vec[index] = temp;
     }
 }
 
