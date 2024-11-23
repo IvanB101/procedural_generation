@@ -88,8 +88,10 @@ fn main() {
         .init_resource::<NoiseConfiguration>()
         .register_type::<Configuration>()
         .register_type::<NoiseConfiguration>()
-        .add_plugins(ResourceInspectorPlugin::<Configuration>::default())
-        .add_plugins(ResourceInspectorPlugin::<NoiseConfiguration>::default())
+        .add_plugins(
+            ResourceInspectorPlugin::<NoiseConfiguration>::default()
+                .run_if(input_toggle_active(true, KeyCode::Escape)),
+        )
         .add_plugins(
             ResourceInspectorPlugin::<Configuration>::default()
                 .run_if(input_toggle_active(true, KeyCode::Escape)),
