@@ -78,8 +78,8 @@ fn make_visible(mut window: Query<&mut Window, With<PrimaryWindow>>) {
 
 fn setup(
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    // mut meshes: ResMut<Assets<Mesh>>,
+    // mut materials: ResMut<Assets<StandardMaterial>>,
     // mut rapier_config: ResMut<RapierConfiguration>,
     // time_fixed: Res<Time<Fixed>>,
 ) {

@@ -56,25 +56,6 @@ fn setup(
     // let mesh_collider = Collider::from_bevy_mesh(&terrain_mesh, &ComputedColliderShape::TriMesh)
     //     .expect("es una pija");
 
-    // commands
-    //     .spawn(PbrBundle {
-    //         transform: Transform::from_xyz(0., 0., 0.),
-    //         mesh: meshes.add(terrain_mesh),
-    //         material: materials.add(StandardMaterial { ..default() }),
-    //         ..default()
-    //     })
-    //     .with_children(|children| {
-    //         children
-    //             .spawn(Collider::heightfield(
-    //                 height_map.height_map.concat(),
-    //                 height_map.samples,
-    //                 height_map.samples,
-    //                 Vec3::ONE,
-    //             ))
-    //             // .insert(Restitution::coefficient(0.5))
-    //             .insert(TransformBundle::from(Transform::from_xyz(0.0, -1.0, 0.0)));
-    //     });
-
     commands
         .spawn(PbrBundle {
             transform: Transform::from_xyz(0., 0., 0.),
