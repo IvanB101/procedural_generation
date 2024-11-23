@@ -1,4 +1,4 @@
-use bevy::{log::info, math::FloatExt, prelude::Vec2};
+use bevy::{math::FloatExt, prelude::Vec2};
 use rand::prelude::*;
 
 use super::Noise;
@@ -69,13 +69,13 @@ impl Perlin {
     }
 }
 
-impl Noise<[f32; 2], f32> for Perlin {
-    fn get(&self, input: &[f32; 2]) -> f32 {
+impl Noise<(f32, f32), f32> for Perlin {
+    fn get(&self, input: (f32, f32)) -> f32 {
         let mut value = 0.;
 
         for (weight, compression_factor) in &self.layers {
-            let x = input[0] * compression_factor;
-            let y = input[1] * compression_factor;
+            let x = input.0 * compression_factor;
+            let y = input.1 * compression_factor;
             let xf = x - x.floor();
             let yf = y - y.floor();
             let x = x as usize & (self.wrap - 1);

@@ -10,21 +10,24 @@ pub struct HeightMap {
 }
 
 impl HeightMap {
-    pub fn new(size: f32, samples: usize, min_depth: f32, max_depth: f32) -> Self {
-        let mut height_map = Vec::with_capacity(samples + 1);
-        let wrap = 256;
-        let cord_to_wrap = wrap / 4;
-        let noise = Perlin::new(Vec::from([0.5, 0.25, 0.125, 0.075]), wrap);
+    pub fn new<T: Noise<(f32, f32), f32>>(
+        size: f32,
+        samples: usize,
+        min_depth: f32,
+        max_depth: f32,
+        noise: T,
+    ) -> Self {
+        let mut height_map = Vec::with_capacity(samples);
+        let conv_factor = 256. / samples as f32 / 30.;
+        let unit_size = size / samples as f32;
 
         for i in 0..samples {
-            let mut row = Vec::with_capacity(samples + 1);
+            let mut row = Vec::with_capacity(samples);
             for j in 0..samples {
                 row.push(
                     min_depth
-                        + noise.get(&[
-                            i as f32 / cord_to_wrap as f32,
-                            j as f32 / cord_to_wrap as f32,
-                        ]) * (max_depth - min_depth),
+                        + noise.get((i as f32 * conv_factor, j as f32 * conv_factor))
+                            * (max_depth - min_depth),
                 );
             }
             height_map.push(row);
@@ -33,7 +36,7 @@ impl HeightMap {
         HeightMap {
             size,
             samples,
-            unit_size: size / samples as f32,
+            unit_size,
             height_map,
         }
     }
@@ -41,7 +44,17 @@ impl HeightMap {
 
 impl Default for HeightMap {
     fn default() -> HeightMap {
-        HeightMap::new(100., 1000, -0.2, 5.)
+        HeightMap::new(
+            100.,
+            1000,
+            -0.2,
+            5.,
+            Perlin::new(
+                &[(0.5, 1.), (0.25, 2.), (0.125, 4.), (0.075, 8.)],
+                256,
+                None,
+            ),
+        )
     }
 }
 

@@ -117,7 +117,7 @@ fn setup(
 
     for y in 0..global.height {
         for x in 0..global.width {
-            let value = (noise.get(&[x as f32 * factor, y as f32 * factor]) * 256.) as u8;
+            let value = (noise.get((x as f32 * factor, y as f32 * factor)) * 256.) as u8;
 
             colors.push(value);
             colors.push(value);
@@ -180,7 +180,7 @@ fn update(
 
     for y in 0..global.height {
         for x in 0..global.width {
-            let value = (noise.get(&[x as f32 * factor, y as f32 * factor]) * 256.) as u8;
+            let value = (noise.get((x as f32 * factor, y as f32 * factor)) * 256.) as u8;
 
             colors.push(value);
             colors.push(value);

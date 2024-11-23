@@ -3,6 +3,8 @@ use bevy_rapier3d::prelude::*;
 
 use height_map::HeightMap;
 
+use crate::utils::noise::perlin::Perlin;
+
 mod height_map;
 
 pub struct TerrainPlugin;
@@ -19,7 +21,7 @@ impl Default for MapInfo {
     fn default() -> Self {
         MapInfo {
             size: 50.,
-            samples: 150,
+            samples: 1000,
             min_depth: -2.5,
             max_depth: 2.5,
         }
@@ -45,6 +47,11 @@ fn setup(
         map_info.samples,
         map_info.min_depth,
         map_info.max_depth,
+        Perlin::new(
+            &[(0.5, 1.), (0.25, 2.), (0.125, 4.), (0.075, 8.)],
+            256,
+            None,
+        ),
     );
     let height_collider = Collider::heightfield(
         height_map.height_map.concat(),
