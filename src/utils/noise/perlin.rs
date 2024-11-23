@@ -10,7 +10,7 @@ pub struct Perlin {
 }
 
 impl Perlin {
-    pub fn new(influence: Vec<f32>, wrap: usize) -> Self {
+    pub fn new(influence: &[f32], wrap: usize) -> Self {
         let mut permutation = (0..wrap).collect();
         shuffle(&mut permutation);
         permutation.append(&mut permutation.clone());
@@ -19,9 +19,18 @@ impl Perlin {
         Perlin {
             permutation,
             wrap,
-            influence,
+            influence: Vec::from(influence),
             infl_sum,
         }
+    }
+
+    pub fn set_influence(&mut self, influence: &[f32]) {
+        self.influence = Vec::from(influence);
+        self.infl_sum = influence.iter().sum();
+    }
+
+    pub fn set_wrap(&mut self, wrap: usize) {
+        self.wrap = wrap;
     }
 }
 
