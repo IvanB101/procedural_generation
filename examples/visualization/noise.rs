@@ -21,7 +21,7 @@ struct NoiseImage;
 #[derive(Reflect, Resource, InspectorOptions)]
 #[reflect(Resource, InspectorOptions)]
 struct NoiseConfiguration {
-    influence: Vec<f32>,
+    layers: Vec<(f32, f32)>,
     wrap: usize,
     // #[inspector(min = 0.0, max = 1.0)]
 }
@@ -29,7 +29,7 @@ struct NoiseConfiguration {
 impl Default for NoiseConfiguration {
     fn default() -> Self {
         NoiseConfiguration {
-            influence: vec![0.5, 0.25, 0.125, 0.075],
+            layers: vec![(0.5, 1.), (0.25, 2.), (0.125, 4.), (0.075, 8.)],
             wrap: 256,
         }
     }
@@ -59,12 +59,10 @@ struct Global {
 
 impl Default for Global {
     fn default() -> Self {
-        let NoiseConfiguration {
-            influence, wrap, ..
-        } = NoiseConfiguration::default();
+        let NoiseConfiguration { layers, wrap, .. } = NoiseConfiguration::default();
 
         Global {
-            noise: Perlin::new(&influence, wrap),
+            noise: Perlin::new(&layers, wrap),
             width: 1920,
             height: 1080,
         }
@@ -168,7 +166,7 @@ fn update(
     }
 
     if noise_config.is_changed() {
-        global.noise.set_influence(&noise_config.influence);
+        global.noise.set_layers(&noise_config.layers);
         global.noise.set_wrap(noise_config.wrap);
     }
 

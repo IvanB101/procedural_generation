@@ -5,28 +5,35 @@ use super::Noise;
 pub struct Perlin {
     permutation: Vec<usize>,
     wrap: usize,
-    influence: Vec<f32>,
-    infl_sum: f32,
+    layers: Vec<(f32, f32)>,
 }
 
 impl Perlin {
-    pub fn new(influence: &[f32], wrap: usize) -> Self {
+    pub fn new(layers: &[(f32, f32)], wrap: usize) -> Self {
         let mut permutation = (0..wrap).collect();
         shuffle(&mut permutation);
         permutation.append(&mut permutation.clone());
-        let infl_sum = influence.iter().sum();
+
+        let infl_sum: f32 = layers.iter().map(|(weight, _)| weight).sum();
+        let layers = layers
+            .iter()
+            .map(|(weight, compression_factor)| (weight / infl_sum, *compression_factor))
+            .collect();
 
         Perlin {
             permutation,
             wrap,
-            influence: Vec::from(influence),
-            infl_sum,
+            layers,
         }
     }
 
-    pub fn set_influence(&mut self, influence: &[f32]) {
-        self.influence = Vec::from(influence);
-        self.infl_sum = influence.iter().sum();
+    pub fn set_layers(&mut self, layers: &[(f32, f32)]) {
+        let infl_sum: f32 = layers.iter().map(|(weight, _)| weight).sum();
+
+        self.layers = layers
+            .iter()
+            .map(|(weight, compression_factor)| (weight / infl_sum, *compression_factor))
+            .collect();
     }
 
     pub fn set_wrap(&mut self, wrap: usize) {
@@ -38,9 +45,9 @@ impl Noise<[f32; 2], f32> for Perlin {
     fn get(&self, input: &[f32; 2]) -> f32 {
         let mut value = 0.;
 
-        for i in 0..self.influence.len() {
-            let x = input[0] * ((1 << i) as f32);
-            let y = input[1] * ((1 << i) as f32);
+        for (weight, compression_factor) in &self.layers {
+            let x = input[0] * compression_factor;
+            let y = input[1] * compression_factor;
             let xf = x - x.floor();
             let yf = y - y.floor();
             let x = x as usize & (self.wrap - 1);
@@ -68,8 +75,7 @@ impl Noise<[f32; 2], f32> for Perlin {
             value += dot_bottom_left
                 .lerp(dot_top_left, v)
                 .lerp(dot_bottom_right.lerp(dot_top_right, v), u)
-                * self.influence[i]
-                / self.infl_sum;
+                * weight;
         }
 
         // Normalized to [0, 1]
