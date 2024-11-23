@@ -1,4 +1,5 @@
 use bevy::{
+    input::common_conditions::input_toggle_active,
     prelude::*,
     render::{
         render_asset::RenderAssetUsages,
@@ -69,10 +70,13 @@ fn main() {
             }),
             ..default()
         }))
-        .init_resource::<Configuration>()
         .init_resource::<Global>()
+        .init_resource::<Configuration>()
         .register_type::<Configuration>()
-        .add_plugins(ResourceInspectorPlugin::<Configuration>::default())
+        .add_plugins(
+            ResourceInspectorPlugin::<Configuration>::default()
+                .run_if(input_toggle_active(true, KeyCode::Escape)),
+        )
         .add_plugins(CommonPlugin)
         .add_plugins(bevy_framepace::FramepacePlugin)
         .add_systems(Startup, (setup, make_visible))
