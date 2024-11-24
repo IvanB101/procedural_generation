@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = "0.14.2"
+bevy = { version = "0.14.2", features = ["file_watcher"] }
 bevy_dylib = "0.14.2"
 bevy_framepace = "0.17.1"
 bevy_rapier3d = { version = "0.27.0", features = ["parallel", "simd-stable"] }
@@ -22,8 +22,8 @@ opt-level = 1
 opt-level = 3
 
 [[example]]
-name = "noise"
-path = "examples/visualization/noise.rs"
+name = "perlin_noise"
+path = "examples/visualization/noise/perlin.rs"
 # doc-scrape-examples = true
 
 [package.metadata.example.noise]
