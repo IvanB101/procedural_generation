@@ -1,5 +1,5 @@
-#import bevy_pbr::{pbr_fragment::pbr_input_from_standard_material,pbr_functions::alpha_discard}
-#import bevy_pbr::{forward_io::{VertexOutput, FragmentOutput},pbr_functions::{apply_pbr_lighting, main_pass_post_lighting_processing}}
+#import bevy_pbr::{pbr_fragment::pbr_input_from_standard_material, pbr_functions::alpha_discard}
+#import bevy_pbr::{forward_io::{VertexOutput, FragmentOutput}, pbr_functions::{apply_pbr_lighting, main_pass_post_lighting_processing}}
 
 // @vertex
 // fn vertex() -> @builtin(position) vec4<f32> {

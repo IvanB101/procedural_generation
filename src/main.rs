@@ -10,6 +10,7 @@ use common::CommonPlugin;
 use hud::HUDPlugin;
 use input_handling::InputHandlingPlugin;
 use player::PlayerPlugin;
+use post_processing::PostProcessPlugin;
 use terrain::TerrainPlugin;
 
 mod camera;
@@ -17,6 +18,7 @@ mod common;
 mod hud;
 mod input_handling;
 mod player;
+mod post_processing;
 mod terrain;
 mod ui;
 mod utils;
@@ -65,6 +67,7 @@ fn main() {
             PlayerPlugin,
             InputHandlingPlugin,
             TerrainPlugin,
+            PostProcessPlugin,
         ))
         // Systems
         .add_systems(Startup, (make_visible, setup))
