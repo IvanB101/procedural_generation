@@ -50,6 +50,7 @@ fn setup_hud(mut commands: Commands) {
                     },
                     background_color: Color::WHITE.into(),
                     border_color: BorderColor(Color::BLACK),
+                    border_radius: BorderRadius::MAX,
                     ..default()
                 })
                 .insert(Crosshair);
