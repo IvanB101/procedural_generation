@@ -1,3 +1,4 @@
+pub mod cellular;
 pub mod perlin;
 #[allow(dead_code)]
 pub mod value;

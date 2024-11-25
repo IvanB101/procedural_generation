@@ -6,7 +6,6 @@ pub struct Perlin {
     permutation: Vec<usize>,
     wrap: usize,
     layers: Vec<(f32, f32)>,
-    seed: u64,
 }
 
 impl Perlin {
@@ -30,42 +29,7 @@ impl Perlin {
             permutation,
             wrap,
             layers,
-            seed,
         }
-    }
-
-    pub fn set_layers(&mut self, layers: &[(f32, f32)]) {
-        let infl_sum: f32 = layers.iter().map(|(weight, _)| weight).sum();
-
-        self.layers = layers
-            .iter()
-            .map(|(weight, compression_factor)| (weight / infl_sum, *compression_factor))
-            .collect();
-    }
-
-    pub fn set_wrap(&mut self, wrap: usize) {
-        self.wrap = wrap;
-
-        self.permutation = (0..wrap).collect();
-        let mut rng = StdRng::seed_from_u64(self.seed);
-        self.permutation.shuffle(&mut rng);
-        self.permutation.append(&mut self.permutation.clone());
-    }
-
-    pub fn set_seed(&mut self, seed: u64) {
-        self.permutation = (0..self.wrap).collect();
-        let mut rng = StdRng::seed_from_u64(seed);
-        self.permutation.shuffle(&mut rng);
-        self.permutation.append(&mut self.permutation.clone());
-
-        self.seed = seed;
-    }
-
-    pub fn regen(&mut self) {
-        let mut rng = rand::thread_rng();
-        let seed: u64 = rng.next_u64();
-
-        self.set_seed(seed);
     }
 }
 
