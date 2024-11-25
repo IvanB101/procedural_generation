@@ -299,8 +299,8 @@ impl FromWorld for PostProcessPipeline {
 struct PostProcessSettings {
     intensity: f32,
     // WebGL2 structs must be 16 byte aligned.
-    #[cfg(feature = "webgl2")]
-    _webgl2_padding: Vec3,
+    // #[cfg(feature = "webgl2")]
+    // _webgl2_padding: Vec3,
 }
 
 /// Set up a simple 3D scene
