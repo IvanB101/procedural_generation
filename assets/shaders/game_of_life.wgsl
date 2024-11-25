@@ -48,17 +48,10 @@ fn update(@builtin(global_invocation_id) invocation_id: vec3<u32>) {
     let location = vec2<i32>(i32(invocation_id.x), i32(invocation_id.y));
 
     let n_alive = count_alive(location);
+    let alive = is_alive(location, 0, 0);
+    let lives = (n_alive | alive) == 3;
 
-    var alive: bool;
-    if n_alive == 3 {
-        alive = true;
-    } else if n_alive == 2 {
-        let currently_alive = is_alive(location, 0, 0);
-        alive = bool(currently_alive);
-    } else {
-        alive = false;
-    }
-    let color = vec4<f32>(f32(alive));
+    let color = vec4<f32>(f32(lives) * 0.1, f32(lives), f32(lives), 1);
 
     textureStore(output, location, color);
 }

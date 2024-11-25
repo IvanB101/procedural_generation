@@ -76,14 +76,14 @@ fn setup(
     let image1 = images.add(image);
 
     // let quad_handle = meshes.add(Rectangle::new(SIZE.0 as f32, SIZE.1 as f32));
-    let shape_handle = meshes.add(Sphere::new(SIZE.0 as f32 / 2.).mesh().ico(20).unwrap());
+    let shape_handle = meshes.add(Sphere::new(SIZE.0 as f32 / PI).mesh().ico(20).unwrap());
 
     let material_handle = materials.add(StandardMaterial {
         base_color_texture: Some(image0.clone()),
         // alpha_mode: AlphaMode::Blend,
         unlit: true,
         cull_mode: Some(Face::Front),
-        // base_color: Color::WHITE,
+        base_color: Color::srgb(1., 1., 1.),
         ..default()
     });
 
