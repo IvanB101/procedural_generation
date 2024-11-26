@@ -26,6 +26,10 @@ name = "cellular_noise"
 path = "examples/visualization/noise/cellular.rs"
 
 [[example]]
+name = "mapped_noise"
+path = "examples/visualization/noise/mapped.rs"
+
+[[example]]
 name = "perlin_noise"
 path = "examples/visualization/noise/perlin.rs"
 # doc-scrape-examples = true

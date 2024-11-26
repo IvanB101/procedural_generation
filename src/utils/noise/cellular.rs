@@ -29,7 +29,10 @@ impl Cellular<(f32, f32)> {
     }
 }
 
-impl Noise<(f32, f32), f32> for Cellular<(f32, f32)> {
+impl Noise for Cellular<(f32, f32)> {
+    type Input = (f32, f32);
+    type Output = f32;
+
     fn get(&self, input: (f32, f32)) -> f32 {
         let mut min_x = 2.;
         let mut min_y = 2.;

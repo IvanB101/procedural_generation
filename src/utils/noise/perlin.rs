@@ -33,7 +33,10 @@ impl Perlin {
     }
 }
 
-impl Noise<(f32, f32), f32> for Perlin {
+impl Noise for Perlin {
+    type Input = (f32, f32);
+    type Output = f32;
+
     fn get(&self, input: (f32, f32)) -> f32 {
         let mut value = 0.;
 
