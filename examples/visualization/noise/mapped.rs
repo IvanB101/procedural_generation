@@ -8,7 +8,7 @@ use bevy::{
 use bevy_inspector_egui::prelude::*;
 use bevy_inspector_egui::InspectorOptions;
 use common::{noise_playground, ImageWrapper, TransformWrapper};
-use procedural_generation::utils::noise::{cellular::Cellular, mapper::Mapper, Noise};
+use procedural_generation::utils::noise::{cellular::Cellular, Noise};
 
 #[path = "../../common/mod.rs"]
 mod common;
@@ -46,16 +46,6 @@ impl Default for Global {
     }
 }
 
-fn mapper(value: f32) -> f32 {
-    let threshold = 0.05;
-
-    if value < threshold {
-        1. + value * (1. - 1. / threshold)
-    } else {
-        value
-    }
-}
-
 impl From<(Configuration, Global)> for ImageWrapper {
     fn from(value: (Configuration, Global)) -> Self {
         let (config, global) = value;
@@ -67,8 +57,15 @@ impl From<(Configuration, Global)> for ImageWrapper {
             ..
         } = config;
 
-        let mut noise = Mapper::new(Cellular::new(width, height, seed));
-        noise.add_custom(mapper);
+        let noise = Cellular::new(width, height, seed).map(|value| {
+            let threshold = 0.05;
+
+            if value < threshold {
+                1. + value * (1. - 1. / threshold)
+            } else {
+                value
+            }
+        });
 
         let mut colors = Vec::new();
 

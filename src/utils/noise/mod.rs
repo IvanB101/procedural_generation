@@ -1,4 +1,6 @@
-pub mod mapper;
+use map::Map;
+
+pub mod map;
 
 pub mod cellular;
 pub mod perlin;
@@ -10,4 +12,11 @@ pub trait Noise {
     type Output;
 
     fn get(&self, input: Self::Input) -> Self::Output;
+
+    fn map<F>(self, f: F) -> Map<Self, F>
+    where
+        Self: Sized,
+    {
+        Map::new(self, f)
+    }
 }
