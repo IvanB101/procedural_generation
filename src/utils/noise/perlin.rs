@@ -17,8 +17,6 @@ impl Perlin {
 
         permutation.append(&mut permutation.clone());
 
-        println!("Len: {:?}", permutation.len());
-
         let infl_sum: f32 = layers.iter().map(|(weight, _)| weight).sum();
         let layers = layers
             .iter()

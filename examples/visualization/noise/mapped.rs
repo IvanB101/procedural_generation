@@ -56,10 +56,6 @@ fn mapper(value: f32) -> f32 {
     }
 }
 
-// f(0) = 1
-// f(t) = t
-// m = (t - 1) / (t - 0)
-
 impl From<(Configuration, Global)> for ImageWrapper {
     fn from(value: (Configuration, Global)) -> Self {
         let (config, global) = value;
@@ -71,7 +67,7 @@ impl From<(Configuration, Global)> for ImageWrapper {
             ..
         } = config;
 
-        let mut noise = Mapper::<Cellular<(f32, f32)>>::new(Cellular::new(width, height, seed));
+        let mut noise = Mapper::new(Cellular::new(width, height, seed));
         noise.add_custom(mapper);
 
         let mut colors = Vec::new();
