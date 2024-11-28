@@ -1,13 +1,6 @@
-use bevy::{
-    prelude::*,
-    render::{
-        render_asset::RenderAssetUsages,
-        render_resource::{Extent3d, TextureDimension, TextureFormat},
-    },
-};
-use bevy_inspector_egui::prelude::*;
-use bevy_inspector_egui::InspectorOptions;
-use common::{noise_playground, ImageWrapper, TransformWrapper};
+use bevy::prelude::*;
+use bevy_inspector_egui::{prelude::*, InspectorOptions};
+use common::{noise_playground, VecWrapper, IMAGE_DIMENSIONS};
 use procedural_generation::utils::noise::{cellular::Cellular, Noise};
 
 #[path = "../../common/mod.rs"]
@@ -31,79 +24,36 @@ impl Default for Configuration {
     }
 }
 
-#[derive(Resource, Clone)]
-struct Global {
-    width: u32,
-    height: u32,
-}
-
-impl Default for Global {
-    fn default() -> Self {
-        Global {
-            width: 1920,
-            height: 1080,
-        }
-    }
-}
-
-impl From<(Configuration, Global)> for ImageWrapper {
-    fn from(value: (Configuration, Global)) -> Self {
-        let (config, global) = value;
-
-        let Configuration {
-            width,
-            height,
-            seed,
-            ..
-        } = config;
-
-        let noise = Cellular::new(width, height, seed);
+impl From<Configuration> for VecWrapper<u8> {
+    fn from(config: Configuration) -> Self {
+        let (image_width, image_height) = IMAGE_DIMENSIONS;
 
         let mut colors = Vec::new();
 
-        for y in 0..global.height {
-            for x in 0..global.width {
-                let value = (noise.get((
-                    x as f32 * (config.width as f32 / global.width as f32),
-                    y as f32 * (config.height as f32 / global.height as f32),
-                )) * 256.) as u8;
+        let noise = Cellular::new(config.width, config.height, config.seed).map(|value: f32| {
+            let out = (value * 256.).floor() as u8;
 
-                colors.push(value);
-                colors.push(value);
-                colors.push(value);
+            (out, out, out)
+        });
+
+        let x_factor = config.width as f32 / image_width as f32;
+        let y_factor = config.height as f32 / image_height as f32;
+
+        for y in 0..image_height {
+            for x in 0..image_width {
+                let (r, g, b) = noise.get((x as f32 * x_factor, y as f32 * y_factor));
+
+                colors.push(r);
+                colors.push(g);
+                colors.push(b);
                 colors.push(255);
             }
         }
 
-        ImageWrapper {
-            image: Image::new_fill(
-                Extent3d {
-                    width: global.width,
-                    height: global.height,
-                    depth_or_array_layers: 1,
-                },
-                TextureDimension::D2,
-                &colors,
-                TextureFormat::Rgba8Unorm,
-                RenderAssetUsages::RENDER_WORLD,
-            ),
-        }
-    }
-}
-
-impl From<(Configuration, Global)> for TransformWrapper {
-    fn from(value: (Configuration, Global)) -> Self {
-        let (_conf, global) = value;
-        TransformWrapper {
-            transform: Transform::default().with_scale(Vec3 {
-                x: global.width as f32,
-                y: global.height as f32,
-                z: 1.,
-            }),
-        }
+        VecWrapper { vec: colors }
     }
 }
 
 fn main() {
-    noise_playground::<Configuration, Global>();
+    noise_playground::<Configuration>();
 }

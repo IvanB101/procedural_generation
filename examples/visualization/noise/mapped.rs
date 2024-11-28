@@ -1,13 +1,6 @@
-use bevy::{
-    prelude::*,
-    render::{
-        render_asset::RenderAssetUsages,
-        render_resource::{Extent3d, TextureDimension, TextureFormat},
-    },
-};
-use bevy_inspector_egui::prelude::*;
-use bevy_inspector_egui::InspectorOptions;
-use common::{noise_playground, ImageWrapper, TransformWrapper};
+use bevy::prelude::*;
+use bevy_inspector_egui::{prelude::*, InspectorOptions};
+use common::{noise_playground, VecWrapper, IMAGE_DIMENSIONS};
 use procedural_generation::utils::noise::{cellular::Cellular, Noise};
 
 #[path = "../../common/mod.rs"]
@@ -19,99 +12,54 @@ struct Configuration {
     width: u64,
     height: u64,
     seed: Option<u64>,
+    // #[inspector(min = 0.0, max = 1.0)]
 }
 
 impl Default for Configuration {
     fn default() -> Self {
+        let width = 30;
+        let height = 20;
+
         Configuration {
-            width: 30,
-            height: 20,
+            width,
+            height,
             seed: Some(0),
         }
     }
 }
 
-#[derive(Resource, Clone)]
-struct Global {
-    width: u32,
-    height: u32,
-}
-
-impl Default for Global {
-    fn default() -> Self {
-        Global {
-            width: 1920,
-            height: 1080,
-        }
-    }
-}
-
-impl From<(Configuration, Global)> for ImageWrapper {
-    fn from(value: (Configuration, Global)) -> Self {
-        let (config, global) = value;
-
-        let Configuration {
-            width,
-            height,
-            seed,
-            ..
-        } = config;
-
-        let noise = Cellular::new(width, height, seed).map(|value| {
-            let threshold = 0.05;
-
-            if value < threshold {
-                1. + value * (1. - 1. / threshold)
-            } else {
-                value
-            }
-        });
+impl From<Configuration> for VecWrapper<u8> {
+    fn from(config: Configuration) -> Self {
+        let (image_width, image_height) = IMAGE_DIMENSIONS;
 
         let mut colors = Vec::new();
 
-        for y in 0..global.height {
-            for x in 0..global.width {
-                let value = (noise.get((
-                    x as f32 * (config.width as f32 / global.width as f32),
-                    y as f32 * (config.height as f32 / global.height as f32),
-                )) * 256.) as u8;
+        let noise = Cellular::new(config.width, config.height, config.seed).map(|input: f32| {
+            let value = ((1. - input).sqrt() - 0.2).clamp(0., 1.);
 
-                colors.push(value);
-                colors.push(value);
-                colors.push(value);
+            let out = (value * 256.).floor() as u8;
+
+            (out, out, out)
+        });
+
+        let x_factor = config.width as f32 / image_width as f32;
+        let y_factor = config.height as f32 / image_height as f32;
+
+        for y in 0..image_height {
+            for x in 0..image_width {
+                let (r, g, b) = noise.get((x as f32 * x_factor, y as f32 * y_factor));
+
+                colors.push(r);
+                colors.push(g);
+                colors.push(b);
                 colors.push(255);
             }
         }
 
-        ImageWrapper {
-            image: Image::new_fill(
-                Extent3d {
-                    width: global.width,
-                    height: global.height,
-                    depth_or_array_layers: 1,
-                },
-                TextureDimension::D2,
-                &colors,
-                TextureFormat::Rgba8Unorm,
-                RenderAssetUsages::RENDER_WORLD,
-            ),
-        }
-    }
-}
-
-impl From<(Configuration, Global)> for TransformWrapper {
-    fn from(value: (Configuration, Global)) -> Self {
-        let (_conf, global) = value;
-        TransformWrapper {
-            transform: Transform::default().with_scale(Vec3 {
-                x: global.width as f32,
-                y: global.height as f32,
-                z: 1.,
-            }),
-        }
+        VecWrapper { vec: colors }
     }
 }
 
 fn main() {
-    noise_playground::<Configuration, Global>();
+    noise_playground::<Configuration>();
 }
