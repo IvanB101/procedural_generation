@@ -49,6 +49,8 @@ fn main() {
         // State
         .init_state::<AppState>()
         // Resources
+        // Clear color
+        .insert_resource(ClearColor(Color::BLACK))
         // Rapier
         .insert_resource({
             let mut rap_conf = RapierConfiguration::new(1.);
