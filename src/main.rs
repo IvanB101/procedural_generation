@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 #[allow(unused_imports)]
 #[cfg(debug_assertions)]
 use bevy_dylib;
@@ -7,11 +9,9 @@ use bevy_rapier3d::prelude::*;
 
 use camera::MyCameraPlugin;
 use common::CommonPlugin;
-use compute_shader::GameOfLifeComputePlugin;
 use hud::HUDPlugin;
 use input_handling::InputHandlingPlugin;
 use player::PlayerPlugin;
-use post_processing::PostProcessPlugin;
 use terrain::TerrainPlugin;
 
 mod camera;

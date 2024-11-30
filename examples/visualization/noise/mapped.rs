@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_inspector_egui::{prelude::*, InspectorOptions};
 use common::{noise_playground, VecWrapper, IMAGE_DIMENSIONS};
-use procedural_generation::utils::noise::{perlin::Perlin, Noise};
+use procedural_generation::utils::noise::{cellular::Cellular, Noise};
 
 #[path = "../../common/mod.rs"]
 mod common;
@@ -9,19 +9,20 @@ mod common;
 #[derive(Reflect, Resource, InspectorOptions, Clone)]
 #[reflect(Resource, InspectorOptions)]
 struct Configuration {
-    layers: Vec<(f32, f32)>,
-    wrap: usize,
+    width: u64,
+    height: u64,
     seed: Option<u64>,
-    #[inspector(min = 0.0, max = 1.0)]
-    compress_factor: f32,
+    // #[inspector(min = 0.0, max = 1.0)]
 }
 
 impl Default for Configuration {
     fn default() -> Self {
+        let width = 30;
+        let height = 20;
+
         Configuration {
-            compress_factor: 0.05,
-            layers: vec![(0.5, 1.), (0.25, 2.), (0.125, 4.), (0.075, 8.)],
-            wrap: 256,
+            width,
+            height,
             seed: Some(0),
         }
     }
@@ -33,14 +34,16 @@ impl From<Configuration> for VecWrapper<u8> {
 
         let mut colors = Vec::new();
 
-        let noise = Perlin::new(&config.layers, config.wrap, config.seed).map(|value: f32| {
-            let out: u8 = (value * 256.).floor() as u8;
+        let noise = Cellular::new(config.width, config.height, config.seed).map(|input: f32| {
+            let value = ((1. - input).sqrt() - 0.2).clamp(0., 1.);
+
+            let out = (value * 256.).floor() as u8;
 
             (out, out, out)
         });
 
-        let x_factor = config.wrap as f32 / image_width as f32 * config.compress_factor;
-        let y_factor = config.wrap as f32 / image_height as f32 * config.compress_factor;
+        let x_factor = config.width as f32 / image_width as f32;
+        let y_factor = config.height as f32 / image_height as f32;
 
         for y in 0..image_height {
             for x in 0..image_width {

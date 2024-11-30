@@ -22,12 +22,20 @@ opt-level = 1
 opt-level = 3
 
 [[example]]
+name = "cellular_noise"
+path = "examples/visualization/noise/cellular.rs"
+
+[[example]]
+name = "mapped_noise"
+path = "examples/visualization/noise/mapped.rs"
+
+[[example]]
 name = "perlin_noise"
 path = "examples/visualization/noise/perlin.rs"
 # doc-scrape-examples = true
 
-[package.metadata.example.noise]
-name = "Compute - Game of Life"
-description = "A compute shader that simulates Conway's Game of Life"
-category = "Shaders"
-wasm = false
+# [package.metadata.example.noise]
+# name = "Compute - Game of Life"
+# description = "A compute shader that simulates Conway's Game of Life"
+# category = "Shaders"
+# wasm = false

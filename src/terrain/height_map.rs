@@ -10,7 +10,7 @@ pub struct HeightMap {
 }
 
 impl HeightMap {
-    pub fn new<T: Noise<(f32, f32), f32>>(
+    pub fn new<T: Noise<Input = (f32, f32), Output = f32>>(
         size: f32,
         samples: usize,
         min_depth: f32,

@@ -1,27 +1,28 @@
 use bevy::{
-    input::common_conditions::input_toggle_active, prelude::*, sprite::MaterialMesh2dBundle,
+    input::common_conditions::input_toggle_active,
+    prelude::*,
+    render::{
+        render_asset::RenderAssetUsages,
+        render_resource::{Extent3d, TextureDimension, TextureFormat},
+    },
+    sprite::MaterialMesh2dBundle,
     window::PrimaryWindow,
 };
 use bevy_inspector_egui::quick::ResourceInspectorPlugin;
 use procedural_generation::common::CommonPlugin;
 
+pub struct VecWrapper<T> {
+    pub vec: Vec<T>,
+}
+
+pub const IMAGE_DIMENSIONS: (u32, u32) = (1920, 1080);
+
 #[derive(Component)]
 struct NoiseImage;
 
-pub struct ImageWrapper {
-    pub image: Image,
-}
-
-pub struct TransformWrapper {
-    pub transform: Transform,
-}
-
-pub fn noise_playground<'a, C, G>()
+pub fn noise_playground<C>()
 where
-    C: Resource + Default + Reflect + Clone,
-    G: Resource + Default + Clone,
-    (C, G): Into<ImageWrapper>,
-    (C, G): Into<TransformWrapper>,
+    C: Resource + Default + Reflect + Clone + Into<VecWrapper<u8>>,
 {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
@@ -33,7 +34,6 @@ where
             }),
             ..default()
         }))
-        .init_resource::<G>()
         .init_resource::<C>()
         .add_plugins(
             ResourceInspectorPlugin::<C>::default()
@@ -41,8 +41,8 @@ where
         )
         .add_plugins(CommonPlugin)
         .add_plugins(bevy_framepace::FramepacePlugin)
-        .add_systems(Startup, (setup::<C, G>, make_visible))
-        .add_systems(Update, update::<C, G>)
+        .add_systems(Startup, (setup, make_visible))
+        .add_systems(Update, update::<C>)
         // .add_systems(Update, resize)
         .run();
 }
@@ -52,30 +52,36 @@ fn make_visible(mut window: Query<&mut Window, With<PrimaryWindow>>) {
     window.single_mut().visible = true;
 }
 
-fn setup<'a, C, G>(
+fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut images: ResMut<Assets<Image>>,
-    config: Res<C>,
-    global: Res<G>,
-) where
-    C: Resource + Default + Reflect + Clone,
-    G: Resource + Default + Clone,
-    (C, G): Into<ImageWrapper>,
-    (C, G): Into<TransformWrapper>,
-{
-    let transform_wrapper: TransformWrapper = (config.clone(), global.clone()).into();
-    let wrapper: ImageWrapper = (config.clone(), global.clone()).into();
+) {
+    let transform = Transform::default().with_scale(Vec3 {
+        x: IMAGE_DIMENSIONS.0 as f32,
+        y: IMAGE_DIMENSIONS.1 as f32,
+        z: 1.,
+    });
 
     commands.spawn(Camera2dBundle::default());
     commands.spawn((
         MaterialMesh2dBundle {
             mesh: meshes.add(Rectangle::default()).into(),
-            transform: transform_wrapper.transform,
+            transform: transform,
             material: materials.add(ColorMaterial {
                 color: Color::srgb(1., 1., 1.),
-                texture: Some(images.add(wrapper.image)),
+                texture: Some(images.add(Image::new_fill(
+                    Extent3d {
+                        width: IMAGE_DIMENSIONS.0,
+                        height: IMAGE_DIMENSIONS.1,
+                        depth_or_array_layers: 1,
+                    },
+                    TextureDimension::D2,
+                    &[0, 0, 0, 0],
+                    TextureFormat::Rgba8Unorm,
+                    RenderAssetUsages::RENDER_WORLD,
+                ))),
             }),
             ..default()
         },
@@ -83,16 +89,13 @@ fn setup<'a, C, G>(
     ));
 }
 
-fn update<'a, C, G>(
+fn update<C>(
     mut mesh_query: Query<&mut Handle<ColorMaterial>, With<NoiseImage>>,
     mut images: ResMut<Assets<Image>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     config: Res<C>,
-    global: Res<G>,
 ) where
-    C: Resource + Default + Reflect + Clone,
-    G: Resource + Default + Clone,
-    (C, G): Into<ImageWrapper>,
+    C: Resource + Default + Reflect + Clone + Into<VecWrapper<u8>>,
 {
     if !config.is_changed() {
         return;
@@ -104,10 +107,22 @@ fn update<'a, C, G>(
         return;
     }
 
-    let wrapper: ImageWrapper = (config.clone(), global.clone()).into();
+    let colors = config.clone().into();
+
+    let image = Image::new_fill(
+        Extent3d {
+            width: IMAGE_DIMENSIONS.0,
+            height: IMAGE_DIMENSIONS.1,
+            depth_or_array_layers: 1,
+        },
+        TextureDimension::D2,
+        &colors.vec,
+        TextureFormat::Rgba8Unorm,
+        RenderAssetUsages::RENDER_WORLD,
+    );
 
     *material.unwrap() = materials.add(ColorMaterial {
         color: Color::srgb(1., 1., 1.),
-        texture: Some(images.add(wrapper.image)),
+        texture: Some(images.add(image)),
     });
 }
