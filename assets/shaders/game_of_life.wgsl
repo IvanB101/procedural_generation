@@ -4,9 +4,9 @@
 // Two textures are needed for the game of life as each pixel of step N depends on the state of its
 // neighbors at step N-1.
 
-@group(0) @binding(0) var input: texture_storage_2d<r32float, read>;
+@group(0) @binding(0) var input: texture_storage_2d<rgba32float, read>;
 
-@group(0) @binding(1) var output: texture_storage_2d<r32float, write>;
+@group(0) @binding(1) var output: texture_storage_2d<rgba32float, write>;
 
 fn hash(value: u32) -> u32 {
     var state = value;
@@ -29,7 +29,7 @@ fn init(@builtin(global_invocation_id) invocation_id: vec3<u32>, @builtin(num_wo
 
     let randomNumber = randomFloat(invocation_id.y << 16u | invocation_id.x);
     let alive = randomNumber > 0.94;
-    let color = vec4<f32>(f32(alive));
+    let color = vec4<f32>(vec3f(f32(alive)), 1);
 
     textureStore(output, location, color);
 }
@@ -48,10 +48,10 @@ fn update(@builtin(global_invocation_id) invocation_id: vec3<u32>) {
     let location = vec2<i32>(i32(invocation_id.x), i32(invocation_id.y));
 
     let n_alive = count_alive(location);
-    let alive = is_alive(location, 0, 0);
-    let lives = (n_alive | alive) == 3;
+    let self_alive = is_alive(location, 0, 0);
+    let alive = (n_alive | self_alive) == 3;
 
-    let color = vec4<f32>(f32(lives) * 0.1, f32(lives), f32(lives), 1);
+    let color = vec4<f32>(vec3f(f32(alive)), 1);
 
     textureStore(output, location, color);
 }

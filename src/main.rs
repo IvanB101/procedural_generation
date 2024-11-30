@@ -70,7 +70,7 @@ fn main() {
             InputHandlingPlugin,
             TerrainPlugin,
             // PostProcessPlugin,
-            GameOfLifeComputePlugin,
+            // GameOfLifeComputePlugin,
         ))
         // Systems
         .add_systems(Startup, (make_visible, setup))

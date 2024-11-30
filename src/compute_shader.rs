@@ -64,14 +64,20 @@ fn setup(
             depth_or_array_layers: 1,
         },
         TextureDimension::D2,
-        &[0, 0, 0, 255],
-        TextureFormat::R32Float,
+        Vec::<f32>::from([0., 0., 0., 1.])
+            .iter()
+            .map(|x| x.to_ne_bytes())
+            .flatten()
+            .collect::<Vec<u8>>()
+            .as_slice(),
+        TextureFormat::Rgba32Float,
         RenderAssetUsages::RENDER_WORLD,
     );
 
     image.texture_descriptor.usage =
         TextureUsages::COPY_DST | TextureUsages::STORAGE_BINDING | TextureUsages::TEXTURE_BINDING;
 
+    // let test_image = images.add(image_test.clone());
     let image0 = images.add(image.clone());
     let image1 = images.add(image);
 
@@ -80,7 +86,7 @@ fn setup(
 
     let material_handle = materials.add(StandardMaterial {
         base_color_texture: Some(image0.clone()),
-        // alpha_mode: AlphaMode::Blend,
+        alpha_mode: AlphaMode::Blend,
         unlit: true,
         cull_mode: Some(Face::Front),
         base_color: Color::srgb(1., 1., 1.),
@@ -194,8 +200,8 @@ impl FromWorld for GameOfLifePipeline {
             &BindGroupLayoutEntries::sequential(
                 ShaderStages::COMPUTE,
                 (
-                    texture_storage_2d(TextureFormat::R32Float, StorageTextureAccess::ReadOnly),
-                    texture_storage_2d(TextureFormat::R32Float, StorageTextureAccess::WriteOnly),
+                    texture_storage_2d(TextureFormat::Rgba32Float, StorageTextureAccess::ReadOnly),
+                    texture_storage_2d(TextureFormat::Rgba32Float, StorageTextureAccess::WriteOnly),
                 ),
             ),
         );
@@ -304,6 +310,7 @@ impl render_graph::Node for GameOfLifeNode {
                     .unwrap();
                 pass.set_bind_group(0, &bind_groups[0], &[]);
                 pass.set_pipeline(init_pipeline);
+                // pass.dispatch_workgroups(SIZE.0 / WORKGROUP_SIZE, SIZE.1 / WORKGROUP_SIZE, 1);
                 pass.dispatch_workgroups(SIZE.0 / WORKGROUP_SIZE, SIZE.1 / WORKGROUP_SIZE, 1);
             }
             GameOfLifeState::Update(index) => {
@@ -312,6 +319,7 @@ impl render_graph::Node for GameOfLifeNode {
                     .unwrap();
                 pass.set_bind_group(0, &bind_groups[index], &[]);
                 pass.set_pipeline(update_pipeline);
+                // pass.dispatch_workgroups(SIZE.0 / WORKGROUP_SIZE, SIZE.1 / WORKGROUP_SIZE, 1);
                 pass.dispatch_workgroups(SIZE.0 / WORKGROUP_SIZE, SIZE.1 / WORKGROUP_SIZE, 1);
             }
         }
