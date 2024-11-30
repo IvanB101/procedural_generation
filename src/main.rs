@@ -7,6 +7,7 @@ use bevy_rapier3d::prelude::*;
 
 use camera::MyCameraPlugin;
 use common::CommonPlugin;
+use compute_shader::GameOfLifeComputePlugin;
 use hud::HUDPlugin;
 use input_handling::InputHandlingPlugin;
 use player::PlayerPlugin;
@@ -15,6 +16,7 @@ use terrain::TerrainPlugin;
 
 mod camera;
 mod common;
+mod compute_shader;
 mod hud;
 mod input_handling;
 mod player;
@@ -67,7 +69,8 @@ fn main() {
             PlayerPlugin,
             InputHandlingPlugin,
             TerrainPlugin,
-            PostProcessPlugin,
+            // PostProcessPlugin,
+            // GameOfLifeComputePlugin,
         ))
         // Systems
         .add_systems(Startup, (make_visible, setup))

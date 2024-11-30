@@ -59,7 +59,7 @@ fn setup_player(
             player_mark: Player {},
         })
         .insert(SpatialBundle::from_transform(Transform::from_xyz(
-            0., 10., 0.,
+            0., 8., 0.,
         )))
         .insert(RigidBody::KinematicPositionBased)
         .insert({
