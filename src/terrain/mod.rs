@@ -3,7 +3,7 @@ use bevy::{
     prelude::*,
     render::render_resource::{AsBindGroup, ShaderRef},
 };
-use bevy_rapier3d::prelude::*;
+// use bevy_rapier3d::prelude::*;
 
 use height_map::HeightMap;
 
@@ -63,47 +63,71 @@ fn setup(
             None,
         ),
     );
-    let height_collider = Collider::heightfield(
-        height_map.height_map.concat(),
-        height_map.samples,
-        height_map.samples,
-        Vec3::new(map_info.size, 1., map_info.size),
-    );
+    // let height_collider = Collider::heightfield(
+    //     height_map.height_map.concat(),
+    //     height_map.samples,
+    //     height_map.samples,
+    //     Vec3::new(map_info.size, 1., map_info.size),
+    // );
     let terrain_mesh = Mesh::from(height_map);
     // let mesh_collider = Collider::from_bevy_mesh(&terrain_mesh, &ComputedColliderShape::TriMesh)
     //     .expect("es una pija");
 
-    commands
-        .spawn(MaterialMeshBundle {
-            transform: Transform::from_xyz(0., 0., 0.),
-            mesh: meshes.add(terrain_mesh),
-            material: materials.add(ExtendedMaterial {
-                base: StandardMaterial {
-                    // base_color: RED.into(),
-                    // can be used in forward or deferred mode.
-                    opaque_render_method: OpaqueRendererMethod::Forward,
-                    // in deferred mode, only the PbrInput can be modified (uvs, color and other material properties),
-                    // in forward mode, the output can also be modified after lighting is applied.
-                    // see the fragment shader `extended_material.wgsl` for more info.
-                    // Note: to run in deferred mode, you must also add a `DeferredPrepass` component to the camera and either
-                    // change the above to `OpaqueRendererMethod::Deferred` or add the `DefaultOpaqueRendererMethod` resource.
-                    // ? weird alpha
-                    // alpha_mode: AlphaMode::Blend,
-                    perceptual_roughness: 1.,
-                    ..Default::default()
-                },
-                extension: MyCustomExtension {
-                    quantize_steps: 100,
-                },
-            }),
-            ..default()
-        })
-        .with_children(|children| {
-            children
-                .spawn(height_collider)
-                // .insert(Restitution::coefficient(0.5))
-                .insert(TransformBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)));
-        });
+    commands.spawn((
+        Transform::from_xyz(0., 0., 0.),
+        Mesh3d(meshes.add(terrain_mesh)),
+        MeshMaterial3d(materials.add(ExtendedMaterial {
+            base: StandardMaterial {
+                // base_color: RED.into(),
+                // can be used in forward or deferred mode.
+                opaque_render_method: OpaqueRendererMethod::Forward,
+                // in deferred mode, only the PbrInput can be modified (uvs, color and other material properties),
+                // in forward mode, the output can also be modified after lighting is applied.
+                // see the fragment shader `extended_material.wgsl` for more info.
+                // Note: to run in deferred mode, you must also add a `DeferredPrepass` component to the camera and either
+                // change the above to `OpaqueRendererMethod::Deferred` or add the `DefaultOpaqueRendererMethod` resource.
+                // ? weird alpha
+                // alpha_mode: AlphaMode::Blend,
+                perceptual_roughness: 1.,
+                ..Default::default()
+            },
+            extension: MyCustomExtension {
+                quantize_steps: 100,
+            },
+        })),
+    ));
+
+    // commands
+    //     .spawn(MaterialMeshBundle {
+    //         transform: Transform::from_xyz(0., 0., 0.),
+    //         mesh: meshes.add(terrain_mesh),
+    //         material: materials.add(ExtendedMaterial {
+    //             base: StandardMaterial {
+    //                 // base_color: RED.into(),
+    //                 // can be used in forward or deferred mode.
+    //                 opaque_render_method: OpaqueRendererMethod::Forward,
+    //                 // in deferred mode, only the PbrInput can be modified (uvs, color and other material properties),
+    //                 // in forward mode, the output can also be modified after lighting is applied.
+    //                 // see the fragment shader `extended_material.wgsl` for more info.
+    //                 // Note: to run in deferred mode, you must also add a `DeferredPrepass` component to the camera and either
+    //                 // change the above to `OpaqueRendererMethod::Deferred` or add the `DefaultOpaqueRendererMethod` resource.
+    //                 // ? weird alpha
+    //                 // alpha_mode: AlphaMode::Blend,
+    //                 perceptual_roughness: 1.,
+    //                 ..Default::default()
+    //             },
+    //             extension: MyCustomExtension {
+    //                 quantize_steps: 100,
+    //             },
+    //         }),
+    //         ..default()
+    //     })
+    //     .with_children(|children| {
+    //         children
+    //             .spawn(height_collider)
+    //             // .insert(Restitution::coefficient(0.5))
+    //             .insert(TransformBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)));
+    //     });
 }
 
 // fn change_uniform(

@@ -18,7 +18,6 @@ use bevy::{
             *,
         },
         renderer::{RenderContext, RenderDevice},
-        texture::BevyDefault,
         view::ViewTarget,
         RenderApp,
     },
@@ -284,6 +283,7 @@ impl FromWorld for PostProcessPipeline {
                 depth_stencil: None,
                 multisample: MultisampleState::default(),
                 push_constant_ranges: vec![],
+                zero_initialize_workgroup_memory: true,
             });
 
         Self {
@@ -354,15 +354,15 @@ struct Rotates;
 /// Rotates any entity around the x and y axis
 fn rotate(time: Res<Time>, mut query: Query<&mut Transform, With<Rotates>>) {
     for mut transform in &mut query {
-        transform.rotate_x(0.55 * time.delta_seconds());
-        transform.rotate_z(0.15 * time.delta_seconds());
+        transform.rotate_x(0.55 * time.delta_secs());
+        transform.rotate_z(0.15 * time.delta_secs());
     }
 }
 
 // Change the intensity over time to show that the effect is controlled from the main world
 fn update_settings(mut settings: Query<&mut PostProcessSettings>, time: Res<Time>) {
     for mut setting in &mut settings {
-        let mut intensity = time.elapsed_seconds().sin();
+        let mut intensity = time.elapsed_secs().sin();
         // Make it loop periodically
         intensity = intensity.sin();
         // Remap it to 0..1 because the intensity can't be negative

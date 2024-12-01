@@ -1,20 +1,19 @@
 use bevy::{
-    ecs::query::QuerySingleError,
     input::mouse::{MouseMotion, MouseWheel},
     prelude::*,
     window::{CursorGrabMode, PrimaryWindow},
 };
-use bevy_rapier3d::{plugin::RapierContext, prelude::QueryFilter};
+// use bevy_rapier3d::{plugin::RapierContext, prelude::QueryFilter};
 
-use crate::{
-    player::{CameraHolder, Player},
-    AppState,
-};
+use crate::AppState;
 
 pub struct MyCameraPlugin;
 
 #[derive(Component)]
 pub struct MainCamera;
+
+#[derive(Component)]
+pub struct CameraHolder;
 
 // #[derive(Component, Default, Debug, Clone, Copy)]
 // pub struct FpsCam {
@@ -50,7 +49,13 @@ impl Plugin for MyCameraPlugin {
                     .chain(),)
                     .run_if(in_state(AppState::InGame)),
             )
-            .add_systems(Update, (mouse_motion, cameraholder_follow_player))
+            .add_systems(
+                Update,
+                (
+                    mouse_motion,
+                    // cameraholder_follow_player
+                ),
+            )
             .add_systems(OnEnter(AppState::InGame), toggle_cursor_grab)
             .add_systems(OnExit(AppState::InGame), toggle_cursor_grab);
     }
@@ -59,22 +64,15 @@ impl Plugin for MyCameraPlugin {
 fn setup_camera(mut commands: Commands) {
     // MainCamera
     commands
-        .spawn((Transform::default(), CameraHolder))
+        .spawn((Transform::from_xyz(0., 6., 0.), CameraHolder))
         .with_children(|parent| {
-            // parent.spawn((
-            //     Camera3dBundle {
-            //         transform: Transform::from_xyz(0., 0., 0.).looking_at(Vec3::ZERO, Vec3::Y),
-            //         ..default()
-            //     },
-            //     MainCamera,
-            // ));
-
             parent.spawn((
                 Camera3d::default(),
                 // Camera {
                 //     ..default()
                 // },
-                Transform::from_xyz(0., 0., 0.).looking_at(Vec3::ZERO, Vec3::Y),
+                Transform::default().looking_at(Vec3::ZERO, Vec3::Y),
+                MainCamera,
             ));
         });
 }
@@ -138,25 +136,25 @@ fn change_camera_distance_with_mousewheel(
 //     }
 // }
 
-fn cameraholder_follow_player(
-    player_q: Query<&Transform, (With<Player>, Without<MainCamera>)>,
-    mut cameraholder_q: Query<&mut Transform, (With<CameraHolder>, Without<Player>)>,
-) {
-    match player_q.get_single() {
-        Ok(Transform {
-            translation: player_translation,
-            ..
-        }) => {
-            cameraholder_q.single_mut().translation = *player_translation + Vec3::new(0., 0.85, 0.);
-        }
-        Err(QuerySingleError::NoEntities(_)) => {
-            println!("Error: There is no player!");
-        }
-        Err(QuerySingleError::MultipleEntities(_)) => {
-            println!("Error: There is more than one player!");
-        }
-    }
-}
+// fn cameraholder_follow_player(
+//     player_q: Query<&Transform, (With<Player>, Without<MainCamera>)>,
+//     mut cameraholder_q: Query<&mut Transform, (With<CameraHolder>, Without<Player>)>,
+// ) {
+//     match player_q.get_single() {
+//         Ok(Transform {
+//             translation: player_translation,
+//             ..
+//         }) => {
+//             cameraholder_q.single_mut().translation = *player_translation + Vec3::new(0., 0.85, 0.);
+//         }
+//         Err(QuerySingleError::NoEntities(_)) => {
+//             println!("Error: There is no player!");
+//         }
+//         Err(QuerySingleError::MultipleEntities(_)) => {
+//             println!("Error: There is more than one player!");
+//         }
+//     }
+// }
 
 fn toggle_cursor_grab(mut q_primary_window: Query<&mut Window, With<PrimaryWindow>>) {
     let mut primary_window = q_primary_window.single_mut();
@@ -173,7 +171,7 @@ fn toggle_cursor_grab(mut q_primary_window: Query<&mut Window, With<PrimaryWindo
 // mose_motion on update without run_if to clear the events when the cursor is not locked, to prevent buffering input.
 fn mouse_motion(
     mut mouse_motion_events: EventReader<MouseMotion>,
-    mut cameraholder_q: Query<&mut Transform, (With<CameraHolder>, Without<Player>)>,
+    mut cameraholder_q: Query<&mut Transform, With<CameraHolder>>,
     camera_config: Res<CameraConfig>,
     q_primary_window: Query<&Window, With<PrimaryWindow>>,
 ) {

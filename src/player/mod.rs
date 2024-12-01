@@ -22,9 +22,6 @@ struct PlayerBundle {
 }
 
 #[derive(Component)]
-pub struct CameraHolder;
-
-#[derive(Component)]
 pub struct ModelHolder;
 
 impl Plugin for PlayerPlugin {

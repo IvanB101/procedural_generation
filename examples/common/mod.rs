@@ -5,7 +5,6 @@ use bevy::{
         render_asset::RenderAssetUsages,
         render_resource::{Extent3d, TextureDimension, TextureFormat},
     },
-    sprite::MaterialMesh2dBundle,
     window::PrimaryWindow,
 };
 use bevy_inspector_egui::quick::ResourceInspectorPlugin;
@@ -40,7 +39,7 @@ where
                 .run_if(input_toggle_active(true, KeyCode::Escape)),
         )
         .add_plugins(CommonPlugin)
-        .add_plugins(bevy_framepace::FramepacePlugin)
+        // .add_plugins(bevy_framepace::FramepacePlugin)
         .add_systems(Startup, (setup, make_visible))
         .add_systems(Update, update::<C>)
         // .add_systems(Update, resize)
@@ -64,33 +63,33 @@ fn setup(
         z: 1.,
     });
 
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn(Camera2d::default());
+
     commands.spawn((
-        MaterialMesh2dBundle {
-            mesh: meshes.add(Rectangle::default()).into(),
-            transform: transform,
-            material: materials.add(ColorMaterial {
-                color: Color::srgb(1., 1., 1.),
-                texture: Some(images.add(Image::new_fill(
-                    Extent3d {
-                        width: IMAGE_DIMENSIONS.0,
-                        height: IMAGE_DIMENSIONS.1,
-                        depth_or_array_layers: 1,
-                    },
-                    TextureDimension::D2,
-                    &[0, 0, 0, 0],
-                    TextureFormat::Rgba8Unorm,
-                    RenderAssetUsages::RENDER_WORLD,
-                ))),
-            }),
-            ..default()
-        },
+        transform,
+        Mesh2d(meshes.add(Rectangle::default())),
+        MeshMaterial2d(materials.add(ColorMaterial {
+            color: Color::srgb(1., 1., 1.),
+            texture: Some(images.add(Image::new_fill(
+                Extent3d {
+                    width: IMAGE_DIMENSIONS.0,
+                    height: IMAGE_DIMENSIONS.1,
+                    depth_or_array_layers: 1,
+                },
+                TextureDimension::D2,
+                &[0, 0, 0, 0],
+                TextureFormat::Rgba8Unorm,
+                RenderAssetUsages::RENDER_WORLD,
+            ))),
+            // alpha_mode: bevy::sprite::AlphaMode2d::Blend,
+            ..Default::default()
+        })),
         NoiseImage,
     ));
 }
 
 fn update<C>(
-    mut mesh_query: Query<&mut Handle<ColorMaterial>, With<NoiseImage>>,
+    mut mesh_query: Query<&mut MeshMaterial2d<ColorMaterial>, With<NoiseImage>>,
     mut images: ResMut<Assets<Image>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     config: Res<C>,
@@ -121,8 +120,9 @@ fn update<C>(
         RenderAssetUsages::RENDER_WORLD,
     );
 
-    *material.unwrap() = materials.add(ColorMaterial {
+    material.unwrap().0 = materials.add(ColorMaterial {
         color: Color::srgb(1., 1., 1.),
         texture: Some(images.add(image)),
+        ..Default::default()
     });
 }

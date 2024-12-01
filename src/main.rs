@@ -5,13 +5,13 @@
 use bevy_dylib;
 
 use bevy::{prelude::*, window::PrimaryWindow};
-use bevy_rapier3d::prelude::*;
+// use bevy_rapier3d::prelude::*;
 
 use camera::MyCameraPlugin;
 use common::CommonPlugin;
 use hud::HUDPlugin;
 use input_handling::InputHandlingPlugin;
-use player::PlayerPlugin;
+// use player::PlayerPlugin;
 use terrain::TerrainPlugin;
 
 mod camera;
@@ -19,7 +19,7 @@ mod common;
 mod compute_shader;
 mod hud;
 mod input_handling;
-mod player;
+// mod player;
 mod post_processing;
 mod terrain;
 mod ui;
@@ -68,7 +68,7 @@ fn main() {
             CommonPlugin,
             MyCameraPlugin,
             HUDPlugin,
-            PlayerPlugin,
+            // PlayerPlugin,
             InputHandlingPlugin,
             TerrainPlugin,
             // PostProcessPlugin,

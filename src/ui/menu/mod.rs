@@ -8,7 +8,7 @@ const NORMAL_BUTTON: Color = Color::srgb(0.15, 0.15, 0.15);
 const HOVERED_BUTTON: Color = Color::srgb(0.25, 0.25, 0.25);
 const PRESSED_BUTTON: Color = Color::srgb(0.35, 0.75, 0.35);
 
-pub struct Menu;
+pub struct MenuPlugin;
 
 #[derive(Component)]
 pub struct MenuCamera;
@@ -16,7 +16,7 @@ pub struct MenuCamera;
 #[derive(Component)]
 pub struct MainMenu;
 
-impl Plugin for Menu {
+impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup)
             .add_systems(OnEnter(AppState::MainMenu), main_menu)

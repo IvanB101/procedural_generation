@@ -94,17 +94,11 @@ fn setup(
     });
 
     commands.spawn((
-        PbrBundle {
-            mesh: shape_handle.clone(),
-            material: material_handle,
-            transform: Transform::from_xyz(
-                0., 0., //SIZE.1 as f32 / 2. * SCALE_FACTOR * DISPLAY_FACTOR as f32 - 2.,
-                0.,
-            )
+        Transform::from_xyz(0., 0., 0.)
             .with_rotation(Quat::from_rotation_y(PI))
             .with_scale(Vec3::splat(SCALE_FACTOR * DISPLAY_FACTOR as f32)),
-            ..default()
-        },
+        Mesh3d(shape_handle),
+        MeshMaterial3d(material_handle),
         GameOfLifeMarker,
     ));
 
@@ -128,7 +122,7 @@ fn setup(
 // Switch texture to display every frame to show the one that was written to most recently.
 fn switch_textures(
     images: Res<GameOfLifeImages>,
-    material_q: Query<&Handle<StandardMaterial>, With<GameOfLifeMarker>>,
+    material_q: Query<&MeshMaterial3d<StandardMaterial>, With<GameOfLifeMarker>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     let material_handle_r = material_q.get_single();
@@ -214,7 +208,7 @@ impl FromWorld for GameOfLifePipeline {
             shader: shader.clone(),
             shader_defs: vec![],
             entry_point: Cow::from("init"),
-            // zero_initialize_workgroup_memory: false,
+            zero_initialize_workgroup_memory: false,
         });
         let update_pipeline = pipeline_cache.queue_compute_pipeline(ComputePipelineDescriptor {
             label: None,
@@ -223,7 +217,7 @@ impl FromWorld for GameOfLifePipeline {
             shader,
             shader_defs: vec![],
             entry_point: Cow::from("update"),
-            // zero_initialize_workgroup_memory: false,
+            zero_initialize_workgroup_memory: false,
         });
 
         GameOfLifePipeline {

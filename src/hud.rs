@@ -25,109 +25,39 @@ impl Plugin for HUDPlugin {
 fn setup_hud(mut commands: Commands) {
     // root node
     commands
-        .spawn(NodeBundle {
-            style: Style {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
-                ..default()
-            },
-            ..default()
+        .spawn(Node {
+            width: Val::Percent(100.0),
+            height: Val::Percent(100.0),
+            align_items: AlignItems::Center,
+            justify_content: JustifyContent::Center,
+            ..Default::default()
         })
         .with_children(|parent| {
             // Crosshair
             parent
-                .spawn(NodeBundle {
-                    style: Style {
+                .spawn((
+                    Node {
                         width: Val::Px(8.),
                         height: Val::Px(8.),
                         position_type: PositionType::Absolute,
-                        // align_items: AlignItems::Center,
-                        // justify_content: JustifyContent::Center,
                         border: UiRect::all(Val::Px(1.)),
-                        ..default()
+                        ..Default::default()
                     },
-                    background_color: Color::WHITE.into(),
-                    border_color: BorderColor(Color::BLACK),
-                    border_radius: BorderRadius::MAX,
-                    ..default()
-                })
+                    BackgroundColor(Color::WHITE),
+                    BorderColor(Color::BLACK),
+                    BorderRadius::MAX,
+                ))
                 .insert(Crosshair);
         });
 
-    // // Speed text
-    // commands
-    //     .spawn(NodeBundle {
-    //         style: Style {
-    //             // width: Val::Auto,
-    //             // height: Val::Percent(100.0),
-    //             position_type: PositionType::Absolute,
-    //             bottom: Val::Px(10.),
-    //             left: Val::Px(10.),
-    //             align_items: AlignItems::Center,
-    //             justify_content: JustifyContent::Center,
-    //             ..default()
-    //         },
-    //         ..default()
-    //     })
-    //     .with_children(|parent| {
-    //         // Crosshair
-    //         parent.spawn(NodeBundle {
-    //             style: Style {
-    //                 width: Val::Px(8.),
-    //                 height: Val::Px(8.),
-    //                 position_type: PositionType::Absolute,
-    //                 ..default()
-    //             },
-    //             background_color: Color::rgb(1.0, 1.0, 1.0).into(),
-    //             ..default()
-    //         });
-    //     });
-
-    commands.spawn((
-        TextBundle::from_sections([
-            TextSection::new(
-                "", // "FPS: ",
-                TextStyle {
-                    font_size: 20.0,
-                    ..Default::default()
-                },
-            ),
-            TextSection::from_style(TextStyle {
-                font_size: 20.0,
-                color: LIME.into(),
-                ..default()
-            }),
-        ])
-        .with_background_color(Color::BLACK),
-        FpsText,
-    ));
-
-    // // SpeedText
-    // commands.spawn((
-    //     TextBundle::from_sections([
-    //         TextSection::new(
-    //             "SPEED: ",
-    //             TextStyle {
-    //                 font_size: 25.0,
-    //                 ..Default::default()
-    //             },
-    //         ),
-    //         TextSection::from_style(TextStyle {
-    //             font_size: 25.0,
-    //             color: Color::GOLD,
-    //             ..default()
-    //         }),
-    //     ])
-    //     .with_style(Style {
-    //         position_type: PositionType::Absolute,
-    //         bottom: Val::Px(5.0),
-    //         left: Val::Px(5.0),
-    //         ..default()
-    //     }),
-    //     SpeedText,
-    // ));
+    commands
+        .spawn((Text::default(), BackgroundColor(Color::BLACK)))
+        .with_child((
+            TextSpan::new(""),
+            TextColor(LIME.into()),
+            TextFont::from_font_size(20.),
+            FpsText
+        ));
 }
 
 fn crosshair_visibility(
@@ -137,7 +67,7 @@ fn crosshair_visibility(
     let primary_window = window_query.single();
     let mut crosshair_visibility = crosshair_q.single_mut();
 
-    match primary_window.cursor.grab_mode {
+    match primary_window.cursor_options.grab_mode {
         bevy::window::CursorGrabMode::Locked => {
             *crosshair_visibility = Visibility::Visible;
         }
@@ -149,13 +79,13 @@ fn crosshair_visibility(
 
 fn fps_text_update_system(
     diagnostics: Res<DiagnosticsStore>,
-    mut query: Query<&mut Text, With<FpsText>>,
+    mut query: Query<&mut TextSpan, With<FpsText>>,
 ) {
     for mut text in &mut query {
         if let Some(fps) = diagnostics.get(&FrameTimeDiagnosticsPlugin::FPS) {
             if let Some(value) = fps.smoothed() {
-                // Update the value of the second section
-                text.sections[1].value = format!("{value:.0}");
+                // Update the fps text
+                text.0 = format!("{value:.0}");
             }
         }
     }
