@@ -14,6 +14,7 @@ use input_handling::InputHandlingPlugin;
 use limit_fps::LimitFPS;
 // use player::PlayerPlugin;
 use terrain::TerrainPlugin;
+use utils::free_camera::FreeCamera;
 
 mod camera;
 mod common;
@@ -75,6 +76,7 @@ fn main() {
             // PostProcessPlugin,
             // GameOfLifeComputePlugin,
             LimitFPS,
+            FreeCamera,
         ))
         // * Systems
         .add_systems(Startup, (make_visible, setup))
