@@ -56,15 +56,22 @@ fn setup_hud(mut commands: Commands) {
             TextSpan::new(""),
             TextColor(LIME.into()),
             TextFont::from_font_size(20.),
-            FpsText
+            FpsText,
         ));
 }
 
 fn crosshair_visibility(
-    window_query: Query<&Window, With<PrimaryWindow>>,
+    q_primary_window: Query<&Window, With<PrimaryWindow>>,
     mut crosshair_q: Query<&mut Visibility, With<Crosshair>>,
 ) {
-    let primary_window = window_query.single();
+    let primary_window_result = q_primary_window.get_single();
+
+    let primary_window = if primary_window_result.is_err() {
+        return;
+    } else {
+        primary_window_result.unwrap()
+    };
+
     let mut crosshair_visibility = crosshair_q.single_mut();
 
     match primary_window.cursor_options.grab_mode {

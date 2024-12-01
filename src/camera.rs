@@ -64,7 +64,11 @@ impl Plugin for MyCameraPlugin {
 fn setup_camera(mut commands: Commands) {
     // MainCamera
     commands
-        .spawn((Transform::from_xyz(0., 6., 0.), CameraHolder))
+        .spawn((
+            Transform::from_xyz(0., 6., 0.),
+            Visibility::default(),
+            CameraHolder,
+        ))
         .with_children(|parent| {
             parent.spawn((
                 Camera3d::default(),
@@ -175,7 +179,13 @@ fn mouse_motion(
     camera_config: Res<CameraConfig>,
     q_primary_window: Query<&Window, With<PrimaryWindow>>,
 ) {
-    let primary_window = q_primary_window.single();
+    let primary_window_result = q_primary_window.get_single();
+
+    let primary_window = if primary_window_result.is_err() {
+        return;
+    } else {
+        primary_window_result.unwrap()
+    };
 
     if primary_window.cursor_options.grab_mode != CursorGrabMode::Locked {
         mouse_motion_events.clear();
