@@ -74,7 +74,7 @@ fn screen_mode_with_resource(screen_mode: Res<ScreenMode>, mut windows: Query<&m
         let mut window = windows.single_mut();
         match *screen_mode {
             ScreenMode::BorderlessFullscreen => {
-                window.mode = bevy::window::WindowMode::BorderlessFullscreen
+                window.mode = bevy::window::WindowMode::BorderlessFullscreen(MonitorSelection::Current)
             }
             ScreenMode::Windowed => window.mode = bevy::window::WindowMode::Windowed,
         }

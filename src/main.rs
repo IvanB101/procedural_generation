@@ -34,7 +34,7 @@ enum AppState {
 
 fn main() {
     App::new()
-        // Default Plugin
+        // * Default Plugin
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: "Procedural Generation".into(),
@@ -44,26 +44,26 @@ fn main() {
             }),
             ..default()
         }))
-        // Limit FPS and fix latency
-        .add_plugins(bevy_framepace::FramepacePlugin)
-        // State
+        // * Limit FPS and fix latency
+        // .add_plugins(bevy_framepace::FramepacePlugin)
+        // * State
         .init_state::<AppState>()
-        // Resources
-        // Clear color
+        // * Resources
+        // * Clear color
         .insert_resource(ClearColor(Color::BLACK))
-        // Rapier
-        .insert_resource({
-            let mut rap_conf = RapierConfiguration::new(1.);
-            rap_conf.timestep_mode = TimestepMode::Fixed {
-                dt: 1. / 64.,
-                substeps: 1,
-            };
-            rap_conf
-        })
-        .add_plugins(RapierPhysicsPlugin::<NoUserData>::default().in_fixed_schedule())
-        // Comment DebugRenderer to disable
+        // * Rapier
+        // .insert_resource({
+        //     let mut rap_conf = RapierConfiguration::new(1.);
+        //     rap_conf.timestep_mode = TimestepMode::Fixed {
+        //         dt: 1. / 64.,
+        //         substeps: 1,
+        //     };
+        //     rap_conf
+        // })
+        // .add_plugins(RapierPhysicsPlugin::<NoUserData>::default().in_fixed_schedule())
+        // * Comment DebugRenderer to disable
         // .add_plugins(RapierDebugRenderPlugin::default())
-        // Plugins
+        // * Plugins
         .add_plugins((
             CommonPlugin,
             MyCameraPlugin,
@@ -74,12 +74,12 @@ fn main() {
             // PostProcessPlugin,
             // GameOfLifeComputePlugin,
         ))
-        // Systems
+        // * Systems
         .add_systems(Startup, (make_visible, setup))
         .run();
 }
 
-// Make visible on Startup. Prevents long white window on start
+// * Make visible on Startup. Prevents long white window on start
 fn make_visible(mut window: Query<&mut Window, With<PrimaryWindow>>) {
     window.single_mut().visible = true;
 }
@@ -114,29 +114,19 @@ fn setup(
     //     ..default()
     // });
 
-    // directional 'sun' light
-    commands.spawn(DirectionalLightBundle {
-        directional_light: DirectionalLight {
+    // * directional 'sun' light
+    commands.spawn((
+        DirectionalLight {
             illuminance: 500., // light_consts::lux::CLEAR_SUNRISE
             shadows_enabled: true,
             ..default()
         },
-        transform: Transform {
+        Transform {
             translation: Vec3::new(0.0, 2.0, 0.0),
             rotation: Quat::from_rotation_x(-std::f32::consts::PI / 4.),
             ..default()
         },
-        // // The default cascade config is designed to handle large scenes.
-        // // As this example has a much smaller world, we can tighten the shadow
-        // // bounds for better visual quality.
-        // cascade_shadow_config: CascadeShadowConfigBuilder {
-        //     first_cascade_far_bound: 4.0,
-        //     maximum_distance: 10.0,
-        //     ..default()
-        // }
-        // .into(),
-        ..default()
-    });
+    ));
 
     // // ground plane
     // commands

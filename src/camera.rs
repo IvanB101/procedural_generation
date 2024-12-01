@@ -43,7 +43,11 @@ impl Plugin for MyCameraPlugin {
             .add_systems(Startup, setup_camera)
             .add_systems(
                 Update,
-                ((change_camera_distance_with_mousewheel, adjust_camera_distance).chain(),)
+                ((
+                    change_camera_distance_with_mousewheel,
+                    // adjust_camera_distance,
+                )
+                    .chain(),)
                     .run_if(in_state(AppState::InGame)),
             )
             .add_systems(Update, (mouse_motion, cameraholder_follow_player))
@@ -55,14 +59,22 @@ impl Plugin for MyCameraPlugin {
 fn setup_camera(mut commands: Commands) {
     // MainCamera
     commands
-        .spawn((SpatialBundle::default(), CameraHolder))
+        .spawn((Transform::default(), CameraHolder))
         .with_children(|parent| {
+            // parent.spawn((
+            //     Camera3dBundle {
+            //         transform: Transform::from_xyz(0., 0., 0.).looking_at(Vec3::ZERO, Vec3::Y),
+            //         ..default()
+            //     },
+            //     MainCamera,
+            // ));
+
             parent.spawn((
-                Camera3dBundle {
-                    transform: Transform::from_xyz(0., 0., 0.).looking_at(Vec3::ZERO, Vec3::Y),
-                    ..default()
-                },
-                MainCamera,
+                Camera3d::default(),
+                // Camera {
+                //     ..default()
+                // },
+                Transform::from_xyz(0., 0., 0.).looking_at(Vec3::ZERO, Vec3::Y),
             ));
         });
 }
@@ -95,36 +107,36 @@ fn change_camera_distance_with_mousewheel(
     }
 }
 
-const ADJUST_OFFSET: f32 = 0.5;
+// const ADJUST_OFFSET: f32 = 0.5;
 
-fn adjust_camera_distance(
-    cameraholder_q: Query<&GlobalTransform, (With<CameraHolder>, Without<MainCamera>)>,
-    mut camera_q: Query<&mut Transform, (With<MainCamera>, Without<CameraHolder>)>,
-    player_q: Query<Entity, With<Player>>,
-    rapier_context: Res<RapierContext>,
-    camera_distance: Res<CameraDistance>,
-) {
-    let cameraholder_globaltransform = cameraholder_q.single();
-    let mut camera_transform = camera_q.single_mut();
+// fn adjust_camera_distance(
+//     cameraholder_q: Query<&GlobalTransform, (With<CameraHolder>, Without<MainCamera>)>,
+//     mut camera_q: Query<&mut Transform, (With<MainCamera>, Without<CameraHolder>)>,
+//     player_q: Query<Entity, With<Player>>,
+//     rapier_context: Res<RapierContext>,
+//     camera_distance: Res<CameraDistance>,
+// ) {
+//     let cameraholder_globaltransform = cameraholder_q.single();
+//     let mut camera_transform = camera_q.single_mut();
 
-    let ray_pos = cameraholder_globaltransform.translation();
-    let ray_dir = cameraholder_globaltransform.back();
+//     let ray_pos = cameraholder_globaltransform.translation();
+//     let ray_dir = cameraholder_globaltransform.back();
 
-    if let Some((_entity, toi)) = rapier_context.cast_ray(
-        ray_pos,
-        ray_dir.into(),
-        camera_distance.0 + ADJUST_OFFSET,
-        false,
-        QueryFilter::exclude_dynamic()
-            .exclude_sensors()
-            .exclude_rigid_body(player_q.single()),
-    ) {
-        camera_transform.translation.z =
-            toi - (ADJUST_OFFSET * toi / (camera_distance.0 + ADJUST_OFFSET));
-    } else {
-        camera_transform.translation.z = camera_distance.0;
-    }
-}
+//     if let Some((_entity, toi)) = rapier_context.cast_ray(
+//         ray_pos,
+//         ray_dir.into(),
+//         camera_distance.0 + ADJUST_OFFSET,
+//         false,
+//         QueryFilter::exclude_dynamic()
+//             .exclude_sensors()
+//             .exclude_rigid_body(player_q.single()),
+//     ) {
+//         camera_transform.translation.z =
+//             toi - (ADJUST_OFFSET * toi / (camera_distance.0 + ADJUST_OFFSET));
+//     } else {
+//         camera_transform.translation.z = camera_distance.0;
+//     }
+// }
 
 fn cameraholder_follow_player(
     player_q: Query<&Transform, (With<Player>, Without<MainCamera>)>,
@@ -149,12 +161,12 @@ fn cameraholder_follow_player(
 fn toggle_cursor_grab(mut q_primary_window: Query<&mut Window, With<PrimaryWindow>>) {
     let mut primary_window = q_primary_window.single_mut();
 
-    if primary_window.cursor.visible {
-        primary_window.cursor.grab_mode = CursorGrabMode::Locked;
-        primary_window.cursor.visible = false;
+    if primary_window.cursor_options.visible {
+        primary_window.cursor_options.grab_mode = CursorGrabMode::Locked;
+        primary_window.cursor_options.visible = false;
     } else {
-        primary_window.cursor.grab_mode = CursorGrabMode::None;
-        primary_window.cursor.visible = true;
+        primary_window.cursor_options.grab_mode = CursorGrabMode::None;
+        primary_window.cursor_options.visible = true;
     };
 }
 
@@ -167,7 +179,7 @@ fn mouse_motion(
 ) {
     let primary_window = q_primary_window.single();
 
-    if primary_window.cursor.grab_mode != CursorGrabMode::Locked {
+    if primary_window.cursor_options.grab_mode != CursorGrabMode::Locked {
         mouse_motion_events.clear();
         return;
     }
