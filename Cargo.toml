@@ -13,6 +13,7 @@ bevy_dylib = "0.15.0"
 avian3d = { git = "https://github.com/Jondolf/avian", branch = "main" }
 rand = "0.8"
 bevy-inspector-egui = "0.28.0"
+spin_sleep = "1.0"
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]

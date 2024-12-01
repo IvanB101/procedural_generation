@@ -11,6 +11,7 @@ use camera::MyCameraPlugin;
 use common::CommonPlugin;
 use hud::HUDPlugin;
 use input_handling::InputHandlingPlugin;
+use limit_fps::LimitFPS;
 // use player::PlayerPlugin;
 use terrain::TerrainPlugin;
 
@@ -20,6 +21,7 @@ mod compute_shader;
 mod hud;
 mod input_handling;
 // mod player;
+mod limit_fps;
 mod post_processing;
 mod terrain;
 mod ui;
@@ -49,7 +51,6 @@ fn main() {
         // * State
         .init_state::<AppState>()
         // * Resources
-        // * Clear color
         .insert_resource(ClearColor(Color::BLACK))
         // * Rapier
         // .insert_resource({
@@ -73,6 +74,7 @@ fn main() {
             TerrainPlugin,
             // PostProcessPlugin,
             // GameOfLifeComputePlugin,
+            LimitFPS,
         ))
         // * Systems
         .add_systems(Startup, (make_visible, setup))
