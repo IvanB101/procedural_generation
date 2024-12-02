@@ -581,6 +581,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_easy_compute"
+version = "0.14.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fd77cd2a0896399bb2e2cb7f4cf5d5458c4d20ff31d664a344f48c2068def153"
+dependencies = [
+ "bevy",
+ "bytemuck",
+ "naga",
+ "naga_oil",
+ "parking_lot",
+ "wgpu",
+]
+
+[[package]]
 name = "bevy_ecs"
 version = "0.14.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3699,6 +3713,7 @@ dependencies = [
  "bevy",
  "bevy-inspector-egui",
  "bevy_dylib",
+ "bevy_easy_compute",
  "bevy_framepace",
  "bevy_rapier3d",
  "rand",

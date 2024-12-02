@@ -1,4 +1,5 @@
-use crate::utils::noise::{perlin::Perlin, Noise};
+use crate::utils::noise::perlin::perlin_2d::Perlin2D;
+use crate::utils::noise::Noise;
 use bevy::render::render_resource::PrimitiveTopology;
 use bevy::{prelude::*, render::render_asset::RenderAssetUsages};
 
@@ -49,7 +50,7 @@ impl Default for HeightMap {
             1000,
             -0.2,
             5.,
-            Perlin::new(
+            Perlin2D::new(
                 &[(0.5, 1.), (0.25, 2.), (0.125, 4.), (0.075, 8.)],
                 256,
                 None,

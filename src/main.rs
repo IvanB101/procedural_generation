@@ -9,18 +9,16 @@ use bevy_rapier3d::prelude::*;
 
 use camera::MyCameraPlugin;
 use common::CommonPlugin;
-use hud::HUDPlugin;
 use input_handling::InputHandlingPlugin;
 use player::PlayerPlugin;
 use terrain::TerrainPlugin;
+use ui::hud::HUDPlugin;
 
 mod camera;
 mod common;
-mod compute_shader;
-mod hud;
 mod input_handling;
 mod player;
-mod post_processing;
+mod shaders;
 mod terrain;
 mod ui;
 mod utils;

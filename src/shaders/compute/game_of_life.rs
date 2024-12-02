@@ -13,7 +13,7 @@ use bevy::{
 use std::{borrow::Cow, f32::consts::PI};
 
 /// This example uses a shader source file from the assets subdirectory
-const SHADER_ASSET_PATH: &str = "shaders/game_of_life.wgsl";
+const SHADER_ASSET_PATH: &str = "shaders/compute/game_of_life.wgsl";
 
 const DISPLAY_FACTOR: u32 = 1;
 const SIZE: (u32, u32) = (4096 / DISPLAY_FACTOR, 4096 / DISPLAY_FACTOR);

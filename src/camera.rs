@@ -4,7 +4,7 @@ use bevy::{
     prelude::*,
     window::{CursorGrabMode, PrimaryWindow},
 };
-use bevy_rapier3d::{plugin::RapierContext, prelude::QueryFilter};
+// use bevy_rapier3d::{plugin::RapierContext, prelude::QueryFilter};
 
 use crate::{
     player::{CameraHolder, Player},
@@ -43,10 +43,15 @@ impl Plugin for MyCameraPlugin {
             .add_systems(Startup, setup_camera)
             .add_systems(
                 Update,
-                ((change_camera_distance_with_mousewheel, adjust_camera_distance).chain(),)
+                ((
+                    change_camera_distance_with_mousewheel,
+                    adjust_camera_distance,
+                )
+                    .chain(),)
                     .run_if(in_state(AppState::InGame)),
             )
-            .add_systems(Update, (mouse_motion, cameraholder_follow_player))
+            // .add_systems(Update, (mouse_motion, cameraholder_follow_player))
+            .add_systems(Update, mouse_motion)
             .add_systems(OnEnter(AppState::InGame), toggle_cursor_grab)
             .add_systems(OnExit(AppState::InGame), toggle_cursor_grab);
     }
@@ -101,7 +106,7 @@ fn adjust_camera_distance(
     cameraholder_q: Query<&GlobalTransform, (With<CameraHolder>, Without<MainCamera>)>,
     mut camera_q: Query<&mut Transform, (With<MainCamera>, Without<CameraHolder>)>,
     player_q: Query<Entity, With<Player>>,
-    rapier_context: Res<RapierContext>,
+    // rapier_context: Res<RapierContext>,
     camera_distance: Res<CameraDistance>,
 ) {
     let cameraholder_globaltransform = cameraholder_q.single();
@@ -110,20 +115,20 @@ fn adjust_camera_distance(
     let ray_pos = cameraholder_globaltransform.translation();
     let ray_dir = cameraholder_globaltransform.back();
 
-    if let Some((_entity, toi)) = rapier_context.cast_ray(
-        ray_pos,
-        ray_dir.into(),
-        camera_distance.0 + ADJUST_OFFSET,
-        false,
-        QueryFilter::exclude_dynamic()
-            .exclude_sensors()
-            .exclude_rigid_body(player_q.single()),
-    ) {
-        camera_transform.translation.z =
-            toi - (ADJUST_OFFSET * toi / (camera_distance.0 + ADJUST_OFFSET));
-    } else {
-        camera_transform.translation.z = camera_distance.0;
-    }
+    // if let Some((_entity, toi)) = rapier_context.cast_ray(
+    //     ray_pos,
+    //     ray_dir.into(),
+    //     camera_distance.0 + ADJUST_OFFSET,
+    //     false,
+    //     QueryFilter::exclude_dynamic()
+    //         .exclude_sensors()
+    //         .exclude_rigid_body(player_q.single()),
+    // ) {
+    //     camera_transform.translation.z =
+    //         toi - (ADJUST_OFFSET * toi / (camera_distance.0 + ADJUST_OFFSET));
+    // } else {
+    camera_transform.translation.z = camera_distance.0;
+    // }
 }
 
 fn cameraholder_follow_player(

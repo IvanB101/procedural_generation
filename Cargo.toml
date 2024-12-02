@@ -12,6 +12,7 @@ bevy_framepace = "0.17.1"
 bevy_rapier3d = { version = "0.27.0", features = ["parallel", "simd-stable"] }
 rand = "0.8"
 bevy-inspector-egui = "0.27"
+bevy_easy_compute = "0.14.1"
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]
@@ -20,6 +21,10 @@ opt-level = 1
 # Enable high optimizations for dependencies (incl. Bevy), but not for our code:
 [profile.dev.package."*"]
 opt-level = 3
+
+[[example]]
+name = "marching_cubes"
+path = "examples/marching_cubes.rs"
 
 [[example]]
 name = "cellular_noise"

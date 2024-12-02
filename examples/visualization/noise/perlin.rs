@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 use bevy_inspector_egui::{prelude::*, InspectorOptions};
 use common::{noise_playground, VecWrapper, IMAGE_DIMENSIONS};
-use procedural_generation::utils::noise::{perlin::Perlin, Noise};
+use procedural_generation::utils::noise::{
+    perlin::{perlin_2d::Perlin2D, perlin_3d::Perlin3D},
+    Noise,
+};
 
 #[path = "../../common/mod.rs"]
 mod common;
@@ -33,7 +36,13 @@ impl From<Configuration> for VecWrapper<u8> {
 
         let mut colors = Vec::new();
 
-        let noise = Perlin::new(&config.layers, config.wrap, config.seed).map(|value: f32| {
+        // let noise = Perlin2D::new(&config.layers, config.wrap, config.seed).map(|value: f32| {
+        //     let out: u8 = (value * 256.).floor() as u8;
+
+        //     (out, out, out)
+        // });
+
+        let noise = Perlin3D::new(&config.layers, config.wrap, config.seed).map(|value: f32| {
             let out: u8 = (value * 256.).floor() as u8;
 
             (out, out, out)
@@ -44,7 +53,7 @@ impl From<Configuration> for VecWrapper<u8> {
 
         for y in 0..image_height {
             for x in 0..image_width {
-                let (r, g, b) = noise.get((x as f32 * x_factor, y as f32 * y_factor));
+                let (r, g, b) = noise.get((x as f32 * x_factor, y as f32 * y_factor, 0.));
 
                 colors.push(r);
                 colors.push(g);

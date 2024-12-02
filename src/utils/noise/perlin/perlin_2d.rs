@@ -1,14 +1,17 @@
 use bevy::{math::FloatExt, prelude::Vec2};
 use rand::prelude::*;
 
-use super::Noise;
-pub struct Perlin {
+use crate::utils::noise::Noise;
+
+use super::fade;
+
+pub struct Perlin2D {
     permutation: Vec<usize>,
     wrap: usize,
     layers: Vec<(f32, f32)>,
 }
 
-impl Perlin {
+impl Perlin2D {
     pub fn new(layers: &[(f32, f32)], wrap: usize, seed: Option<u64>) -> Self {
         let seed = seed.unwrap_or(0);
         let mut permutation: Vec<usize> = (0..wrap).collect();
@@ -23,7 +26,7 @@ impl Perlin {
             .map(|(weight, compression_factor)| (weight / infl_sum, *compression_factor))
             .collect();
 
-        Perlin {
+        Perlin2D {
             permutation,
             wrap,
             layers,
@@ -31,11 +34,11 @@ impl Perlin {
     }
 }
 
-impl Noise for Perlin {
+impl Noise for Perlin2D {
     type Input = (f32, f32);
     type Output = f32;
 
-    fn get(&self, input: (f32, f32)) -> f32 {
+    fn get(&self, input: Self::Input) -> Self::Output {
         let mut value = 0.;
 
         for (weight, compression_factor) in &self.layers {
@@ -56,11 +59,10 @@ impl Noise for Perlin {
             let value_bottom_right = self.permutation[self.permutation[x + 1] + y];
             let value_bottom_left = self.permutation[self.permutation[x] + y];
 
-            let dot_top_right = top_right.dot(Perlin::get_constant_vector(value_top_right));
-            let dot_top_left = top_left.dot(Perlin::get_constant_vector(value_top_left));
-            let dot_bottom_right =
-                bottom_right.dot(Perlin::get_constant_vector(value_bottom_right));
-            let dot_bottom_left = bottom_left.dot(Perlin::get_constant_vector(value_bottom_left));
+            let dot_top_right = top_right.dot(get_constant_vector(value_top_right));
+            let dot_top_left = top_left.dot(get_constant_vector(value_top_left));
+            let dot_bottom_right = bottom_right.dot(get_constant_vector(value_bottom_right));
+            let dot_bottom_left = bottom_left.dot(get_constant_vector(value_bottom_left));
 
             let u = fade(xf);
             let v = fade(yf);
@@ -76,21 +78,11 @@ impl Noise for Perlin {
     }
 }
 
-trait ConstantVector<I, O> {
-    fn get_constant_vector(v: I) -> O;
-}
-
-impl ConstantVector<usize, Vec2> for Perlin {
-    fn get_constant_vector(v: usize) -> Vec2 {
-        match v & 3 {
-            0 => Vec2::new(1., 1.),
-            1 => Vec2::new(-1., 1.),
-            2 => Vec2::new(-1., -1.),
-            _ => Vec2::new(1., -1.),
-        }
+fn get_constant_vector(v: usize) -> Vec2 {
+    match v & 3 {
+        0 => Vec2::new(1., 1.),
+        1 => Vec2::new(-1., 1.),
+        2 => Vec2::new(-1., -1.),
+        _ => Vec2::new(1., -1.),
     }
-}
-
-pub fn fade(t: f32) -> f32 {
-    return ((6_f32 * t - 15_f32) * t + 10_f32) * t * t * t;
 }

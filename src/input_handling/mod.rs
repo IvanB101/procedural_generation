@@ -11,7 +11,7 @@ pub struct KeyBindings {
     pub left: Option<KeyCode>,
     pub right: Option<KeyCode>,
     pub jump: Option<KeyCode>,
-    // pub down: Option<KeyCode>,
+    pub down: Option<KeyCode>,
     pub sprint: Option<KeyCode>,
     pub pause: Option<KeyCode>,
 }
@@ -24,7 +24,7 @@ impl Default for KeyBindings {
             left: Some(KeyCode::KeyA),
             right: Some(KeyCode::KeyD),
             jump: Some(KeyCode::Space),
-            // down: Some(KeyCode::ControlLeft),
+            down: Some(KeyCode::ControlLeft),
             sprint: Some(KeyCode::ShiftLeft),
             pause: Some(KeyCode::Escape),
         }

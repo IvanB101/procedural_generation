@@ -4,12 +4,10 @@ use bevy::{
     render::render_resource::{AsBindGroup, ShaderRef},
 };
 use bevy_rapier3d::prelude::*;
-
 use height_map::HeightMap;
 
-use crate::utils::noise::perlin::Perlin;
-
-mod height_map;
+use crate::utils::noise::perlin::perlin_2d::Perlin2D;
+pub mod height_map;
 
 pub struct TerrainPlugin;
 
@@ -56,7 +54,7 @@ fn setup(
         map_info.samples,
         map_info.min_depth,
         map_info.max_depth,
-        Perlin::new(
+        Perlin2D::new(
             &[(0.75, 1.), (0.25, 2.)],
             // &[(0.5, 1.), (0.25, 2.), (0.125, 4.), (0.075, 8.)],
             256,
