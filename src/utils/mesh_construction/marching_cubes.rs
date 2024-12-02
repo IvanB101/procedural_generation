@@ -40,47 +40,18 @@ fn marching_cubes(field: ScalarField3D<f32>) -> Mesh {
                     values[z * xy_size + (y + 1) * x_size + x + 1],
                     values[z * xy_size + (y + 1) * x_size + x],
                 ];
+                let xf = x as f32 * unit_size;
+                let yf = y as f32 * unit_size;
+                let zf = z as f32 * unit_size;
                 let verteces = [
-                    [
-                        z as f32 * unit_size + 1.,
-                        y as f32 * unit_size,
-                        x as f32 * unit_size,
-                    ],
-                    [
-                        (z as f32 * unit_size + 1.),
-                        y as f32 * unit_size,
-                        x as f32 * unit_size + 1.,
-                    ],
-                    [
-                        z as f32 * unit_size,
-                        y as f32 * unit_size,
-                        x as f32 * unit_size + 1.,
-                    ],
-                    [
-                        z as f32 * unit_size,
-                        y as f32 * unit_size,
-                        x as f32 * unit_size,
-                    ],
-                    [
-                        (z as f32 * unit_size + 1.),
-                        (y as f32 * unit_size + 1.),
-                        x as f32 * unit_size,
-                    ],
-                    [
-                        (z as f32 * unit_size + 1.),
-                        (y as f32 * unit_size + 1.),
-                        x as f32 * unit_size + 1.,
-                    ],
-                    [
-                        z as f32 * unit_size,
-                        (y as f32 * unit_size + 1.),
-                        x as f32 * unit_size + 1.,
-                    ],
-                    [
-                        z as f32 * unit_size,
-                        (y as f32 * unit_size + 1.),
-                        x as f32 * unit_size,
-                    ],
+                    [(zf + unit_size), yf, xf],
+                    [(zf + unit_size), yf, (xf + unit_size)],
+                    [zf, yf, (xf + unit_size)],
+                    [zf, yf, xf],
+                    [(zf + unit_size), (yf + unit_size), xf],
+                    [(zf + unit_size), (yf + unit_size), (xf + unit_size)],
+                    [zf, (yf + unit_size), (xf + unit_size)],
+                    [zf, (yf + unit_size), xf],
                 ];
 
                 cube_index = 0;
@@ -88,115 +59,27 @@ fn marching_cubes(field: ScalarField3D<f32>) -> Mesh {
                     cube_index |= ((corners[n] < surface) as usize) << n;
                 }
 
-                if EDGE_TABLE[cube_index] & 1 != 0 {
-                    vert_list[0].copy_from_slice(&vertex_intercep(
-                        surface,
-                        verteces[0],
-                        verteces[1],
-                        corners[0],
-                        corners[1],
-                    ));
-                }
-                if EDGE_TABLE[cube_index] & 2 != 0 {
-                    vert_list[1].copy_from_slice(&vertex_intercep(
-                        surface,
-                        verteces[1],
-                        verteces[2],
-                        corners[1],
-                        corners[2],
-                    ));
-                }
-                if EDGE_TABLE[cube_index] & 4 != 0 {
-                    vert_list[2].copy_from_slice(&vertex_intercep(
-                        surface,
-                        verteces[2],
-                        verteces[3],
-                        corners[2],
-                        corners[3],
-                    ));
-                }
-                if EDGE_TABLE[cube_index] & 8 != 0 {
-                    vert_list[3].copy_from_slice(&vertex_intercep(
-                        surface,
-                        verteces[3],
-                        verteces[0],
-                        corners[3],
-                        corners[0],
-                    ));
-                }
-                if EDGE_TABLE[cube_index] & 16 != 0 {
-                    vert_list[4].copy_from_slice(&vertex_intercep(
-                        surface,
-                        verteces[4],
-                        verteces[5],
-                        corners[4],
-                        corners[5],
-                    ));
-                }
-                if EDGE_TABLE[cube_index] & 32 != 0 {
-                    vert_list[5].copy_from_slice(&vertex_intercep(
-                        surface,
-                        verteces[5],
-                        verteces[6],
-                        corners[5],
-                        corners[6],
-                    ));
-                }
-                if EDGE_TABLE[cube_index] & 64 != 0 {
-                    vert_list[6].copy_from_slice(&vertex_intercep(
-                        surface,
-                        verteces[6],
-                        verteces[7],
-                        corners[6],
-                        corners[7],
-                    ));
-                }
-                if EDGE_TABLE[cube_index] & 128 != 0 {
-                    vert_list[7].copy_from_slice(&vertex_intercep(
-                        surface,
-                        verteces[7],
-                        verteces[4],
-                        corners[7],
-                        corners[4],
-                    ));
-                }
-                if EDGE_TABLE[cube_index] & 256 != 0 {
-                    vert_list[8].copy_from_slice(&vertex_intercep(
-                        surface,
-                        verteces[0],
-                        verteces[4],
-                        corners[0],
-                        corners[4],
-                    ));
-                }
-                if EDGE_TABLE[cube_index] & 512 != 0 {
-                    vert_list[9].copy_from_slice(&vertex_intercep(
-                        surface,
-                        verteces[1],
-                        verteces[5],
-                        corners[1],
-                        corners[5],
-                    ));
-                }
-                if EDGE_TABLE[cube_index] & 1024 != 0 {
-                    vert_list[10].copy_from_slice(&vertex_intercep(
-                        surface,
-                        verteces[2],
-                        verteces[6],
-                        corners[2],
-                        corners[6],
-                    ));
-                }
-                if EDGE_TABLE[cube_index] & 2048 != 0 {
-                    vert_list[11].copy_from_slice(&vertex_intercep(
-                        surface,
-                        verteces[3],
-                        verteces[7],
-                        corners[3],
-                        corners[7],
-                    ));
-                }
+                // if EDGE_TABLE[cube_index] & 1 != 0 {
+                //     let offset = (surface - corners[0]) / (corners[1] - corners[0]);
+                //     vert_list[0].copy_from_slice(&[
+                //         (x as f32 + offset) * unit_size,
+                //         y as f32 * unit_size,
+                //         (z + 1) as f32 * unit_size,
+                //     ]);
+                // }
+                for i in 0..SIDES.len() {
+                    let (idx1, idx2) = SIDES[i];
 
+                    if EDGE_TABLE[cube_index] & (1 << i) != 0 {
+                        vert_list[i].copy_from_slice(&vertex_intercep(
+                            surface,
+                            verteces[idx1],
+                            verteces[idx2],
+                            corners[idx1],
+                            corners[idx2],
+                        ));
+                    }
+                }
                 let mut i = 0;
                 while TRI_TABLE[cube_index][i] != -1 {
                     vertices.push(vert_list[TRI_TABLE[cube_index][i] as usize]);
@@ -219,24 +102,38 @@ fn marching_cubes(field: ScalarField3D<f32>) -> Mesh {
 }
 
 fn vertex_intercep(isolevel: f32, p1: [f32; 3], p2: [f32; 3], v1: f32, v2: f32) -> [f32; 3] {
-    if ((isolevel - v1).abs() < 0.00001) {
-        return (p1);
+    if (isolevel - v1).abs() < 0.00001 {
+        return p1;
     }
-    if ((isolevel - v2).abs() < 0.00001) {
-        return (p2);
+    if (isolevel - v2).abs() < 0.00001 {
+        return p2;
     }
-    if ((v1 - v2).abs() < 0.00001) {
-        return (p1);
+    if (v1 - v2).abs() < 0.00001 {
+        return p1;
     }
 
     let mu = (isolevel - v1) / (v2 - v1);
-
     [
         p1[0] + mu * (p2[0] - p1[0]),
         p1[1] + mu * (p2[1] - p1[1]),
         p1[2] + mu * (p2[2] - p1[2]),
     ]
 }
+
+const SIDES: [(usize, usize); 12] = [
+    (0, 1),
+    (1, 2),
+    (2, 3),
+    (3, 0),
+    (4, 5),
+    (5, 6),
+    (6, 7),
+    (7, 4),
+    (4, 0),
+    (5, 1),
+    (6, 2),
+    (7, 3),
+];
 
 const EDGE_TABLE: [usize; 256] = [
     0x0, 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c, 0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03,
